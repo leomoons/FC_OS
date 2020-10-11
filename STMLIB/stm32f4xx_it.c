@@ -29,6 +29,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_it.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 /** @addtogroup Template_Project
   * @{
@@ -138,10 +140,14 @@ void DebugMon_Handler(void)
   * @param  None
   * @retval None
   */
-//void SysTick_Handler(void)
-//{
-//  TimingDelay_Decrement();
-//}
+extern void xPortSysTickHandler(void);
+void SysTick_Handler(void)
+{
+  if(xTaskGetSchedulerState()!=taskSCHEDULER_NOT_STARTED)	//	系统已经运行
+  {
+	  xPortSysTickHandler();
+  }
+}
 
 /******************************************************************************/
 /*                 STM32F4xx Peripherals Interrupt Handlers                   */
