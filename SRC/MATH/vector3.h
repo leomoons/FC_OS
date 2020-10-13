@@ -1,6 +1,6 @@
 #ifndef __VECTOR3_H
 #define __VECTOR3_H
-#include "mathTool.h"
+#include "stm32f4xx.h"
 
 typedef struct {
 	float x;

@@ -169,5 +169,17 @@ void SysTick_Handler(void)
   * @}
   */ 
 
+/**
+  * @brief  This function handles USART2 interrupt request.
+  * @param  None
+  * @retval None
+  */
+#include "drv_usart.h"
+void USART2_IRQHandler(void)
+{
+	Usart2_IRQ();
+}
+
+
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
