@@ -52,7 +52,7 @@ void Usart2_Init(uint32_t baudrate)
 
     //串口中断优先级
     NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init ( &NVIC_InitStructure );
 

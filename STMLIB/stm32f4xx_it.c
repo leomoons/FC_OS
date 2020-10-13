@@ -180,6 +180,15 @@ void USART2_IRQHandler(void)
 	Usart2_IRQ();
 }
 
-
+/**
+  * @brief  This function handles USART2 interrupt request.
+  * @param  None
+  * @retval None
+  */
+#include "drv_sbus.h"
+void USART6_IRQHandler(void)
+{
+	Sbus_IRQ();
+}
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
