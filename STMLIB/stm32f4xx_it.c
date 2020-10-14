@@ -31,6 +31,7 @@
 #include "stm32f4xx_it.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "rgb.h"
 
 /** @addtogroup Template_Project
   * @{
@@ -143,10 +144,11 @@ void DebugMon_Handler(void)
 extern void xPortSysTickHandler(void);
 void SysTick_Handler(void)
 {
-  if(xTaskGetSchedulerState()!=taskSCHEDULER_NOT_STARTED)	//	系统已经运行
-  {
-	  xPortSysTickHandler();
-  }
+	Red_Flash();
+	if(xTaskGetSchedulerState()!=taskSCHEDULER_NOT_STARTED)	//	系统已经运行
+	{
+		xPortSysTickHandler();
+	}
 }
 
 /******************************************************************************/

@@ -4,5 +4,5 @@
 
 void RGB_Init(void);
 void RGB_Flash(void);
-
+void Red_Flash(void);
 #endif

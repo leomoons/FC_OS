@@ -3,7 +3,7 @@
 #include "message.h"
 #include "delay.h"
 #include "LYHDecode.h"
-
+#include "rgb.h"
 
 int main()
 {
@@ -11,6 +11,7 @@ int main()
 	DelayInit(168);
 	
 	Usart2_Init(500000);
+	RGB_Init();
 	
 	while(1)
 	{
