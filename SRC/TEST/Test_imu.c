@@ -16,13 +16,13 @@
 #include "gyroscope.h"
 
 
-Vector3f_t gyro, gyroTreat, gyroLpf;
-Vector3f_t acc, accTreat;
-float temp;
+Vector3f_t gyroR, gyroM , gyroTreat, gyroLpf;
+Vector3f_t accR, accM, accTreat;
+float tempR, tempM;
 
 int main()
 {
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+ 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 	DelayInit(168);
 	RGB_Init();
 	Usart2_Init(500000);
@@ -45,37 +45,37 @@ int main()
 	{	
 		cnt++;
 		//test1: icm20602芯片原始数据更新
-//		ICM20602_UpdateGyro(&gyro);
-//		ICM20602_UpdateAcc(&acc);
-//		ICM20602_UpdateTemp(&temp);
+		ICM20602_UpdateGyro(&gyroR);
+		ICM20602_UpdateAcc(&accR);
+		ICM20602_UpdateTemp(&tempR);
 		
 		
 		//test2: 通过module文件这个接口来更新数据
-		GyroDataUpdate(&gyro);
-		AccDataUpdate(&acc);
-		IMUTempUpdate(&temp);
+		GyroDataUpdate(&gyroM);
+		AccDataUpdate(&accM);
+		IMUTempUpdate(&tempM);
 		
 		
 		//test3: 加速度计和陀螺仪数据处理：校准，低通滤波
-		if(cnt%10 == 0)
-		{
-			LYH_Receive_Loop();
-			RGB_Flash();
-			ImuOrientationDetect();
-		}
-		if(cnt%50==0)
-		{
-			ParamSaveToFlash();
-		}
-		//加速度计数据处理
-		AccCalibration(acc);
-		AccDataPreTreat(acc, &accTreat);
-		ImuLevelCalibration();
-		//陀螺仪数据处理
-		GyroCalibration(gyro);
-		GyroDataPreTreat(gyro, temp, &gyroTreat, &gyroLpf);
+//		if(cnt%10 == 0)
+//		{
+//			LYH_Receive_Loop();
+//			RGB_Flash();
+//			ImuOrientationDetect();
+//		}
+//		if(cnt%50==0)
+//		{
+//			ParamSaveToFlash();
+//		}
+//		//加速度计数据处理
+//		AccCalibration(accR);
+//		AccDataPreTreat(accR, &accTreat);
+//		ImuLevelCalibration();
+//		//陀螺仪数据处理
+//		GyroCalibration(gyroR);
+//		GyroDataPreTreat(gyroR, tempR, &gyroTreat, &gyroLpf);
 		
 		
-		DelayUs(999);
+		DelayMs(2);
 	}
 }
