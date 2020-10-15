@@ -1,8 +1,15 @@
 #ifndef __FLIGHTSTATUS_H
 #define __FLIGHTSTATUS_H
 #include "stm32f4xx.h"
+#include "vector3.h"
 
 
+//放置状态
+enum
+{
+	STATIC,				//静止
+	MOTIONAL				//运动
+};
 
 //传感器校准状态
 enum
@@ -20,12 +27,14 @@ enum
 
 typedef struct
 {
+	uint8_t placement;		//放置状态
 	uint8_t caliSt;			//传感器所处校准状态
 }FLIGHT_STATUS_t;
 
 extern FLIGHT_STATUS_t flyStatus;
 
-
+void PlaceStatusCheck(Vector3f_t gyro);
+uint8_t GetPlaceStatus(void);
 
 void SetCaliStatus(uint8_t status);
 uint8_t GetCaliStatus(void);

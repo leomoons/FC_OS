@@ -166,7 +166,7 @@ void ParamUpdateData(uint16_t dataNum, const void *data)
 {
     memcpy(Param.buffer+dataNum*4, data, 4);
     //参数更新的3秒后刷新一次Flash
-    param_save_cnt = 1;
+    param_save_cnt = 60;
 }
 
 /**********************************************************************************************************
