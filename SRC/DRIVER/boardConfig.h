@@ -10,6 +10,17 @@
 
 
 
+enum 
+{
+	ICM20602,
+	AK8975,
+	SPL0601,
+	W25QXX
+};
+
+
+
+
 
 /**********************************************************************************************************
 *信息发送通道
@@ -17,11 +28,28 @@
 #define DT_USE_USART2 				//开启串口2数传功能
 //#define DT_USE_USB_HID				//开启飞控USBHID连接上位机功能
 
+/**********************************************************************************************************
+*传感器配置
+**********************************************************************************************************/
+#define IMU_TYPE             ICM20602      	//IMU型号
+#define BARO_TYPE            SPL0601       	//气压计型号
+#define MAG_TYPE             AK8975        	//罗盘型号
+#define FLASH_TYPE			 W25QXX			//Flash型号
 
 
 /*板载各个传感器的使能引脚配置*/
 #define W25QXX_CS_RCC		RCC_AHB1Periph_GPIOA
 #define W25QXX_CS_GPIO		GPIOA
 #define W25QXX_CS_PIN		GPIO_Pin_4
+#define ICM20602_CS_RCC		RCC_AHB1Periph_GPIOD
+#define ICM20602_CS_GPIO	GPIOD
+#define ICM20602_CS_PIN		GPIO_Pin_0
+#define AK8975_CS_RCC		RCC_AHB1Periph_GPIOC
+#define AK8975_CS_GPIO		GPIOC
+#define AK8975_CS_PIN		GPIO_Pin_10
+#define SPL06_CS_RCC		RCC_AHB1Periph_GPIOC
+#define SPL06_CS_GPIO		GPIOC
+#define SPL06_CS_PIN		GPIO_Pin_11
+
 
 #endif

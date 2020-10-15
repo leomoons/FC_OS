@@ -9,6 +9,9 @@
 #include "stdlib.h"
 #include "message.h"
 
+#include "accelerometer.h"
+#include "gyroscope.h"
+#include "magnetometer.h"
 
 u8 LYH_RxBuffer[10], LYH_data_ok=0;
 
@@ -69,28 +72,25 @@ void LYH_Receive_Loop(void)
 		switch(LYH_RxBuffer[4])			
 		{
 			case 'a':
-				//AccCalibrateEnable();
-			
+				AccCalibrateEnable();
 				str = "accelerator calibration";
 				MessageSendString(str);
 			break;
 			
 			case 'l':
-				//LevelCalibrateEnable();
-			
+				LevelCalibrateEnable();
 				str = "IMU Level calibration";
 				MessageSendString(str);
 			break;
 			
 			case 'g':
-				//GyroCalibrateEnable();
-			
+				GyroCalibrateEnable();
 				str = "gyroscope calibreation";
 				MessageSendString(str);
 			break;
 			
 			case 'm':
-				//MagCalibrateEnable();
+				MagCalibrateEnable();
 			
 				str = "Magnerometer calibration";
 				MessageSendString(str);
