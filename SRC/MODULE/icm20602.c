@@ -195,10 +195,10 @@ void ICM20602_Init(void)
 {
 	// Device reset
 	ICM20602_SingleWrite(MPU_RA_PWR_MGMT_1, 0x80);		
-	DelayMs(10);
+	DelayXms(10);
 	// Auto select the best available clock source-PLL if ready
 	ICM20602_SingleWrite(MPU_RA_PWR_MGMT_1, 0x01);
-	DelayMs(10);
+	DelayXms(10);
 	
 	// Verify the identity of the device
 //	u8 who_am_i;
@@ -208,46 +208,46 @@ void ICM20602_Init(void)
 
 	// reset accelerator and temperaturer digital signal path
 	ICM20602_SingleWrite(MPU_RA_SIGNAL_PATH_RESET, 0x03);
-	DelayMs(10);
+	DelayXms(10);
 	// reset all gyro digital signal path, accel digital signal path, and temp digital signal path
 	ICM20602_SingleWrite(MPU_RA_USER_CTRL, 0x01);
-	DelayMs(10);
+	DelayXms(10);
 	
 	// Disable I2C slave module and put the serial interface in SPI mode only
 	ICM20602_SingleWrite(MPU_RA_DMP_CFG_1, 0x40);
-	DelayMs(10);
+	DelayXms(10);
 	
 	// Turn on X,Y,Z accelerometer, X,Y,Z gyroscope
 	ICM20602_SingleWrite(MPU_RA_PWR_MGMT_2, 0x00);
-	DelayMs(10);
+	DelayXms(10);
 	
 	// sampling frequency 0x00(1000H), SAMPLE_RATE = INTERNAL_SAMPLE_RATE/(1+SMPLRT_DIV)
 	ICM20602_SingleWrite(MPU_RA_SMPLRT_DIV, (1000/1000-1));
-	DelayMs(10);
+	DelayXms(10);
 	
 	//低通滤波频率
 	ICM20602_SingleWrite(MPU_RA_CONFIG, ICM20602_LPF_20HZ);
-	DelayMs(10);
+	DelayXms(10);
 	
 	//陀螺仪自检及测量范围，典型值0x18(不自检，2000dps) (0x10 1000dps) (0x08 500dps)
 	ICM20602_SingleWrite(MPU_RA_GYRO_CONFIG, (3 << 3));
-	DelayMs(10);
+	DelayXms(10);
 	
 	//加速度计自检及测量范围典型值0x18(不自检， 16G)
 	ICM20602_SingleWrite(MPU_RA_ACCEL_CONFIG, (3 << 3));
-	DelayMs(10);
+	DelayXms(10);
 	
 	//加速度计LPF 20Hz
 	ICM20602_SingleWrite(MPU_RA_ACCEL_CONFIG2, ICM20602_LPF_20HZ);
-	DelayMs(10);
+	DelayXms(10);
 	
 	//关闭低功耗
 	ICM20602_SingleWrite(MPU_RA_FF_DUR, 0x00);
-	DelayMs(10);
+	DelayXms(10);
 	
 	//关闭FIFO
 	ICM20602_SingleWrite(MPU_RA_FIFO_EN, 0x00);
-	DelayMs(10);
+	DelayXms(10);
 
 }
 
