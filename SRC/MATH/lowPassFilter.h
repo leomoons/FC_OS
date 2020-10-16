@@ -1,7 +1,6 @@
 #ifndef _LOWPASSFILTER_H_
 #define _LOWPASSFILTER_H_
-
-#include "mathTool.h"
+#include "vector3.h"
 
 typedef struct
 {

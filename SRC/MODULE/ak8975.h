@@ -1,7 +1,7 @@
 #ifndef __AK8975_H
 #define __AK8975_H
 #include "stm32f4xx.h"
-#include "vector3.h"
+#include "mathConfig.h"
 
 void AK8975CSPin_Init(void);
 

@@ -7,9 +7,9 @@
 **********************************************************************************************************/
 #include "parameter.h"
 #include "w25qxx.h"
-#include "drv_usart.h"
-#include "mathTool.h"
-#include "string.h"
+#include "boardConfig.h"
+#include "mathCOnfig.h"
+#include "string.h"				//使用memcpy()函数
 
 
 
@@ -26,6 +26,8 @@ static uint16_t param_save_cnt = 0;
 **********************************************************************************************************/
 void ParamInit(void)
 {
+	W25QXX_Init();
+	
     ParamReadFromFlash();
 	
 	//TODO: 设置参数读取后的相应状态
@@ -131,7 +133,7 @@ void ParamSaveToFlash(void)
 	{
 		//保存参数数量
 		dataNum = PARAM_NUM;
-		memcpy(Param.buffer+PARAM_CHECK_NUM*4, &dataNum, 4);
+		memcpy(Param.buffer+PARAM_CHECK_NUM*4, &dataNum, 4);//注意大端小端问题
 //		u8 tmpByte = Param.buffer[0];
 //		Param.buffer[0] = Param.buffer[3];
 //		Param.buffer[3] = tmpByte;

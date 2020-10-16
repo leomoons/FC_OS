@@ -1,7 +1,7 @@
 #ifndef _ROTATION_H
 #define _ROTATION_H
+#include "vector3.h"
 
-#include "mathTool.h"
 
 enum Rotation
 {

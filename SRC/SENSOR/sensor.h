@@ -1,6 +1,6 @@
 #ifndef __SENSOR_H
 #define __SENSOR_H
-#include "vector3.h"
+#include "mathConfig.h"
 #include "stdbool.h"
 
 //默认设置传感器自带低通滤波频率为42Hz

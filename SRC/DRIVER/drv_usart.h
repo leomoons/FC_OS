@@ -1,7 +1,7 @@
 #ifndef __DRV_USART_H
 #define __DRV_USART_H
 #include "stm32f4xx.h"
-#include <stdio.h>
+#include <stdio.h>		//关于printf()函数的声明
 
 int fputc(int ch, FILE *f);
 

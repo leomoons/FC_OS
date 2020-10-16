@@ -11,6 +11,7 @@
 #include "flightStatus.h"
 #include "drv_usart.h"
 
+#include "mathConfig.h"
 
 GYROSCOPE_t _gyro;
 

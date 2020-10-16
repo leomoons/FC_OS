@@ -8,7 +8,13 @@
 #ifndef __BOARDCONFIG_H
 #define __BOARDCONFIG_H
 
-
+#include "board.h"
+#include "delay.h"
+#include "drv_spi.h"
+#include "drv_usart.h"
+#include "drv_sbus.h"
+#include "drv_pwm.h"
+#include "rgb.h"
 
 enum 
 {
@@ -17,10 +23,6 @@ enum
 	SPL0601,
 	W25QXX
 };
-
-
-
-
 
 /**********************************************************************************************************
 *信息发送通道

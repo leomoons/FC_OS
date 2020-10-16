@@ -7,7 +7,6 @@
 **********************************************************************************************************/
 #include "spl0601.h"
 #include "boardConfig.h"
-#include "drv_spi.h"
 
 #define PRESSURE_SENSOR			0
 #define TEMPERATURE_SENSOR		1

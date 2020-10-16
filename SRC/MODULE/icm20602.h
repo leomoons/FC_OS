@@ -1,7 +1,7 @@
 #ifndef __ICM20602_H
 #define __ICM20602_H
 #include "stm32f4xx.h"
-#include "mathTool.h"
+#include "mathConfig.h"
 
 void ICM20602CSPin_Init(void);
 void ICM20602_Init(void);

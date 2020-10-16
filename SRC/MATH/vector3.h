@@ -2,6 +2,7 @@
 #define __VECTOR3_H
 #include "stm32f4xx.h"
 
+
 typedef struct {
 	float x;
 	float y;

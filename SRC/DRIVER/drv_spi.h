@@ -1,6 +1,5 @@
 #ifndef __DRV_SPI_H
 #define __DRV_SPI_H
-
 #include "stm32f4xx.h"
 
 void Spi1_Init(void);

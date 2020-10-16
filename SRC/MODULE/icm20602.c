@@ -7,8 +7,6 @@
 **********************************************************************************************************/
 #include "icm20602.h"
 #include "boardConfig.h"
-#include "delay.h"
-#include "drv_spi.h"
 
 
 // Register address

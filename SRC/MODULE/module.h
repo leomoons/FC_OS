@@ -1,7 +1,7 @@
 #ifndef __MODULE_H
 #define __MODULE_H
+#include "mathConfig.h"
 
-#include "mathTool.h"
 
 //IMU中的数据通过队列传递，其他传感器定义好读取函数接口 (*DataRead函数)
 

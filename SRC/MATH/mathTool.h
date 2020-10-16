@@ -1,12 +1,10 @@
 #ifndef __MATHTOOL_H
 #define __MATHTOOL_H
 
-#include <stdint.h>
+#include "stm32f4xx.h"
 #include <math.h>
 
-#include "matrix3.h"
-#include "vector3.h"
-#include "rotation.h"
+
 
 #define M_PI                3.141592653f	//圆周率 			
 #define DEG_TO_RAD			0.01745329f	//角度转弧度

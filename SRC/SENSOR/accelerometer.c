@@ -9,7 +9,7 @@
 #include "parameter.h"
 #include "drv_usart.h"
 #include "flightStatus.h"
-#include "LevenbergMarquardt.h"
+#include "mathConfig.h"
 
 ACCELEROMETER_t _acc;
 

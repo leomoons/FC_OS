@@ -9,7 +9,6 @@
 #include "module.h"
 #include "boardConfig.h"
 
-
 #include "icm20602.h"
 #include "ak8975.h"
 #include "spl0601.h"
