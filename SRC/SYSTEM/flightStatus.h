@@ -7,7 +7,7 @@
 //放置状态
 enum
 {
-	STATIC,				//静止
+	STATIC,					//静止
 	MOTIONAL				//运动
 };
 

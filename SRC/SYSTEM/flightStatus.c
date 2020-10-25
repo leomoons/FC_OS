@@ -18,11 +18,11 @@ FLIGHT_STATUS_t flyStatus;
 *形    参: 角速度
 *返 回 值: 无
 **********************************************************************************************************/
-void PlaceStausCheck(Vector3f_t gyro)
+void PlaceStatusCheck(Vector3f_t gyro)
 {
 	Vector3f_t gyroDiff;
 	static Vector3f_t lastGyro;
-	static float threshold = 1.0f;
+	static float threshold = 0.05f;
 	static uint16_t checkNum = 0;
 	static int16_t count = 0;
 	
