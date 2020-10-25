@@ -29,7 +29,7 @@
 #define AK8975_ASAY_REG         0X11
 #define AK8975_ASAZ_REG         0X12
 
-#define AK8975_MAG_TO_UTESLA 	0.3f	//从采样值到磁感应强度（单位：uT，微特斯拉）
+#define AK8975_MAG_TO_UTESLA 	0.3f	//从采样值到磁感应强度（单位：uT/LSB，微特斯拉）
 
 Vector3i_t magRaw;
 

@@ -55,20 +55,20 @@ void GyroPreTreatInit(void)
 *形    参: 陀螺仪原始数据 陀螺仪预处理数据指针
 *返 回 值: 无
 **********************************************************************************************************/
+Vector3f_t gyrotmp;
 void GyroDataPreTreat(Vector3f_t gyroRaw, float temperature, Vector3f_t* gyroData, Vector3f_t* gyroLpfData)
 {
-	_gyro.data = gyroRaw;
 	
 	//获取温度值
 	_gyro.temperature = temperature;
 	
 	//零偏误差校准
-	_gyro.data.x = (_gyro.data.x - _gyro.cali.offset.x) * _gyro.cali.scale.x;
-	_gyro.data.y = (_gyro.data.y - _gyro.cali.offset.y) * _gyro.cali.scale.y;
-	_gyro.data.z = (_gyro.data.z - _gyro.cali.offset.z) * _gyro.cali.scale.z;
+	gyrotmp.x = (gyroRaw.x - _gyro.cali.offset.x) * _gyro.cali.scale.x;
+	gyrotmp.y = (gyroRaw.y - _gyro.cali.offset.y) * _gyro.cali.scale.y;
+	gyrotmp.z = (gyroRaw.z - _gyro.cali.offset.z) * _gyro.cali.scale.z;
 	
 	//安装误差校准
-	_gyro.data = VectorRotateToBodyFrame(_gyro.data, GetLevelCalibraData());
+	_gyro.data = VectorRotateToBodyFrame(gyrotmp, GetLevelCalibraData());
 	
 	//低通滤波
 	_gyro.dataLpf = LowPassFilter2nd(&_gyro.lpf_2nd, _gyro.data);

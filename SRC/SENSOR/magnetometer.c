@@ -41,12 +41,12 @@ MAGNETOMETER_t _mag;
 void MagPreTreatInit(void)
 {
 	ParamGetData(PARAM_MAG_OFFSET_X, &_mag.cali.offset.x, 4);
-	ParamGetData(PARAM_MAG_OFFSET_Y, &_mag.cali.offset.x, 4);
-	ParamGetData(PARAM_MAG_OFFSET_Z, &_mag.cali.offset.x, 4);
-	ParamGetData(PARAM_MAG_SCALE_X, &_mag.cali.offset.x, 4);
-	ParamGetData(PARAM_MAG_SCALE_X, &_mag.cali.offset.x, 4);
-	ParamGetData(PARAM_MAG_SCALE_X, &_mag.cali.offset.x, 4);
-	ParamGetData(PARAM_MAG_EARTH_MAG, &_mag.cali.offset.x, 4);
+	ParamGetData(PARAM_MAG_OFFSET_Y, &_mag.cali.offset.y, 4);
+	ParamGetData(PARAM_MAG_OFFSET_Z, &_mag.cali.offset.z, 4);
+	ParamGetData(PARAM_MAG_SCALE_X, &_mag.cali.scale.x, 4);
+	ParamGetData(PARAM_MAG_SCALE_Y, &_mag.cali.scale.y, 4);
+	ParamGetData(PARAM_MAG_SCALE_Z, &_mag.cali.scale.z, 4);
+	ParamGetData(PARAM_MAG_EARTH_MAG, &_mag.earthMag, 4);
 	
 	// confirm the validity 
 	if(isnan(_mag.cali.offset.x) || isnan(_mag.cali.offset.y) || isnan(_mag.cali.offset.z) || \
@@ -194,7 +194,7 @@ void MagCalibration(void)
 			
 			
 			//水平旋转一周
-			if(_mag.cali.step == 1 && abs(cali_rotate_angle) > 360)
+			if(_mag.cali.step == 1 && abs(cali_rotate_angle) > 2*M_PI)
 			{
 				_mag.cali.step = 2;
 				cali_rotate_angle = 0;
@@ -204,7 +204,7 @@ void MagCalibration(void)
 				//TODO:mavlink发送当前校准步骤
 			}
 			//竖直旋转一周
-			if(_mag.cali.step == 2 && abs(cali_rotate_angle) > 360)
+			if(_mag.cali.step == 2 && abs(cali_rotate_angle) > 2*M_PI)
 			{
 				cnt_m = 0;
 				_mag.cali.should_cali = 0;

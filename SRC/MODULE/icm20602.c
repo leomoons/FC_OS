@@ -299,9 +299,9 @@ void ICM20602_UpdateGyro(Vector3f_t* gyro)
     gyroRaw.z = (s16)((((u16)GYRObuffer[4]) << 8) | GYRObuffer[5]);
 	
 	//转化为右手系，单位转化为dps(度每秒)
-    gyro->x = (float)gyroRaw.x * MPU_G_s2000dps;
-    gyro->y = (float)gyroRaw.y * MPU_G_s2000dps;
-    gyro->z = (float)gyroRaw.z * MPU_G_s2000dps;
+    gyro->x = (float)gyroRaw.x * MPU_G_s2000dps * DEG_TO_RAD;
+    gyro->y = (float)gyroRaw.y * MPU_G_s2000dps * DEG_TO_RAD;
+    gyro->z = (float)gyroRaw.z * MPU_G_s2000dps * DEG_TO_RAD;
 //	gyro->x = (float)gyroRaw.x;
 //    gyro->y = (float)gyroRaw.y;
 //    gyro->z = (float)gyroRaw.z;

@@ -263,18 +263,18 @@ void AccCalibration(Vector3f_t accRaw)
 	//分别采集加速度计六个方向的数据，顺序随意，每个方向取500个样本求平均值
 	if(caliFlag)
 	{
-		if(samples_count < 500)
+		if(samples_count < 1000)
 		{
 			samples[_acc.cali.step-1].x += accRaw.x;
 			samples[_acc.cali.step-1].y += accRaw.y;
 			samples[_acc.cali.step-1].z += accRaw.z;
 			samples_count++;
 		}
-		else if(samples_count == 500)
+		else if(samples_count == 1000)
 		{
-			samples[_acc.cali.step-1].x /= 500;
-			samples[_acc.cali.step-1].y /= 500;
-			samples[_acc.cali.step-1].z /= 500;
+			samples[_acc.cali.step-1].x /= 1000;
+			samples[_acc.cali.step-1].y /= 1000;
+			samples[_acc.cali.step-1].z /= 1000;
 			samples_count++;
 			
 			caliFlag = 0;
@@ -286,7 +286,7 @@ void AccCalibration(Vector3f_t accRaw)
 		}
 	}
 	
-	if(_acc.cali.step == 6 && samples_count ==501)
+	if(_acc.cali.step == 6 && samples_count ==1001)
 	{
 		//计算方程解初值
 		float initBeta[6];
