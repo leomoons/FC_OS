@@ -29,6 +29,7 @@ int32_t ConstrainInt32(int32_t amt, int32_t low, int32_t high);
 float Radians(float deg);
 float Degrees(float rad);
 
+float Sqrt(float num);
 float Sq(float v);
 float Pythagorous2(float a, float b);
 float Pythagorous3(float a, float b, float c);
