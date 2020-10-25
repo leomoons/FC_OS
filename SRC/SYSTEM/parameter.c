@@ -67,6 +67,8 @@ static void ParamDataReset(void)
 	Param.data[PARAM_IMU_LEVEL_X] = 0.0;
 	Param.data[PARAM_IMU_LEVEL_Y] = 0.0;
 	Param.data[PARAM_IMU_LEVEL_Z] = 0.0;
+	
+	param_save_cnt = 1;
 }
 
 /**********************************************************************************************************
@@ -147,10 +149,14 @@ void ParamSaveToFlash(void)
 			dataSum += (float)Param.buffer[i];
 		}
 		memcpy(Param.buffer+PARAM_CHECK_SUM*4, &dataSum, 4);
-		W25QXX_SectorErase(PARAM_START_ADDR);
+		W25QXX_SectorErase(PARAM_START_ADDR);//接下来每个读写操作需要延时一定时间，否则不会成功
+		DelayMs(1000);
 		W25QXX_PageRead(data, PARAM_START_ADDR, PARAM_NUM*4);
+		DelayMs(1000);
 		W25QXX_PageWrite(Param.buffer, PARAM_START_ADDR, PARAM_NUM*4);
+		DelayMs(1000);
 		W25QXX_PageRead(data, PARAM_START_ADDR, PARAM_NUM*4);
+		DelayMs(1000);
 		printf("Parameters write to flash");
 	}
 	
