@@ -21,7 +21,38 @@ LED Red   - PE7
 #define RGB_BLUE_PIN       	GPIO_Pin_2
 #define LED_RED_PIN			GPIO_Pin_7
 
-
+static void RGB_Green_Off(void)
+{
+    GPIO_ResetBits(LED_GPIO, RGB_GREEN_PIN);
+}
+static void RGB_Green_On(void)
+{
+    GPIO_SetBits(LED_GPIO, RGB_GREEN_PIN);
+}
+static void RGB_Red_Off(void)
+{
+    GPIO_ResetBits(LED_GPIO, RGB_RED_PIN);
+}
+static void RGB_Red_On(void)
+{
+    GPIO_SetBits(LED_GPIO, RGB_RED_PIN);
+}
+static void RGB_Blue_Off(void)
+{
+    GPIO_ResetBits(LED_GPIO, RGB_BLUE_PIN);
+}
+static void RGB_Blue_On(void)
+{
+    GPIO_SetBits(LED_GPIO, RGB_BLUE_PIN);
+}
+static void LED_Red_On(void)
+{
+	GPIO_ResetBits(LED_GPIO, LED_RED_PIN);
+}
+static void LED_Red_Off(void)
+{
+	GPIO_SetBits(LED_GPIO, LED_RED_PIN);
+}
 
 
 
@@ -349,40 +380,5 @@ void Red_Flash(void)
 		LED_Red_On();
 	else
 		LED_Red_Off();
-}
-
-
-
-void RGB_Green_Off(void)
-{
-    GPIO_ResetBits(LED_GPIO, RGB_GREEN_PIN);
-}
-void RGB_Green_On(void)
-{
-    GPIO_SetBits(LED_GPIO, RGB_GREEN_PIN);
-}
-void RGB_Red_Off(void)
-{
-    GPIO_ResetBits(LED_GPIO, RGB_RED_PIN);
-}
-void RGB_Red_On(void)
-{
-    GPIO_SetBits(LED_GPIO, RGB_RED_PIN);
-}
-void RGB_Blue_Off(void)
-{
-    GPIO_ResetBits(LED_GPIO, RGB_BLUE_PIN);
-}
-void RGB_Blue_On(void)
-{
-    GPIO_SetBits(LED_GPIO, RGB_BLUE_PIN);
-}
-void LED_Red_On(void)
-{
-	GPIO_ResetBits(LED_GPIO, LED_RED_PIN);
-}
-void LED_Red_Off(void)
-{
-	GPIO_SetBits(LED_GPIO, LED_RED_PIN);
 }
 
