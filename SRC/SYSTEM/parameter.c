@@ -7,7 +7,7 @@
 **********************************************************************************************************/
 #include "parameter.h"
 #include "w25qxx.h"
-#include "boardConfig.h"
+#include "boardConfig.h" 
 #include "mathCOnfig.h"
 #include "string.h"				//使用memcpy()函数
 
@@ -122,7 +122,7 @@ void ParamReadFromFlash(void)
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
-u8 data[PARAM_NUM*4];
+//u8 data[PARAM_NUM*4];
 void ParamSaveToFlash(void)
 {
 	uint32_t i=0;
@@ -150,13 +150,13 @@ void ParamSaveToFlash(void)
 		}
 		memcpy(Param.buffer+PARAM_CHECK_SUM*4, &dataSum, 4);
 		W25QXX_SectorErase(PARAM_START_ADDR);//接下来每个读写操作需要延时一定时间，否则不会成功
-		DelayMs(1000);
-		W25QXX_PageRead(data, PARAM_START_ADDR, PARAM_NUM*4);
-		DelayMs(1000);
+		DelayMs(200);
+		//W25QXX_PageRead(data, PARAM_START_ADDR, PARAM_NUM*4);
+		//DelayMs(200);
 		W25QXX_PageWrite(Param.buffer, PARAM_START_ADDR, PARAM_NUM*4);
-		DelayMs(1000);
-		W25QXX_PageRead(data, PARAM_START_ADDR, PARAM_NUM*4);
-		DelayMs(1000);
+		//DelayMs(200);
+		//W25QXX_PageRead(data, PARAM_START_ADDR, PARAM_NUM*4);
+		//DelayMs(200);
 		printf("Parameters write to flash");
 	}
 	
@@ -188,5 +188,16 @@ void ParamUpdateData(uint16_t dataNum, const void *data)
 void ParamGetData(uint16_t dataNum, void *data, uint8_t length)
 {
 	memcpy(data, Param.buffer+dataNum*4, length);
+}
+
+/**********************************************************************************************************
+*函 数 名: Param_save_cnt_tox
+*功能说明: 提供给外部的调整param_save_cnt值的函数接口
+*形    参: 要赋的值
+*返 回 值: 无
+**********************************************************************************************************/
+void Param_save_cnt_tox(uint8_t cnt)
+{
+	param_save_cnt = 1;
 }
 

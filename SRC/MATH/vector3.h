@@ -35,13 +35,13 @@ Vector3i_t Vector3fTo3i(Vector3f_t vector);
 Vector3f_t Vector3f_Add(Vector3f_t v1, Vector3f_t v2);
 Vector3f_t Vector3f_Sub(Vector3f_t v1, Vector3f_t v2);
 
+void Hat_Map(float* mat, Vector3f_t vec);
+
 Vector3f_t VectorCrossProduct(Vector3f_t v1, Vector3f_t v2);
 Vector3f_t Matrix3MulVector3(float* m, Vector3f_t vector);
 Vector3f_t VectorRotateToBodyFrame(Vector3f_t vector, Vector3f_t deltaAngle);
 Vector3f_t VectorRotateToEarthFrame(Vector3f_t vector, Vector3f_t deltaAngle);
 
-void EulerAngleToDCM(Vector3f_t angle, float* dcM);
-void EulerAngleToDCM_T(Vector3f_t angle, float* dcM);
 void AccVectorToRollPitchAngle(Vector3f_t* angle, Vector3f_t vector);
 void MagVectorToYawAngle(Vector3f_t* angle, Vector3f_t vector);
 

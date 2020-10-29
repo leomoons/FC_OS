@@ -6,12 +6,11 @@
 int fputc(int ch, FILE *f);
 
 void Usart2_Init(uint32_t baudrate);
-
 void Usart2_IRQ(void);
+void Usart2_Send(char *DataToSend, u8 data_num );
 
-void Usart2_Send (char *DataToSend , u8 data_num );
-
-//void Usart3_Init(uint32_t baudrate);
-
-//void Usart3_IRA(void);
+void Usart3_Init(uint32_t baudrate);
+void Usart3_IRQ(void);
+void Usart3_Send(char *DataToSend, u8 data_num);
+	
 #endif

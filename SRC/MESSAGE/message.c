@@ -62,5 +62,6 @@ void MessageSendString(char *str)
 		if(cnt>50)	break;
 	}
 	Usart2_Send(str, cnt);
+	//Usart3_Send(str, cnt);	//测试usart3信号发送时调用
 }
 

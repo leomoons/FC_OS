@@ -11,10 +11,7 @@
 
 typedef struct
 {
-	float q0;
-	float q1;
-	float q2; 
-	float q3;
+	float quat[4];
 	
 	float _dcm[9];
 	

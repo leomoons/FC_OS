@@ -6,7 +6,7 @@
  * @日期     2020.09
 **********************************************************************************************************/
 #include "vector3.h"
-#include "mathTool.h"
+#include "mathConfig.h"
 
 /**********************************************************************************************************
 *函 数 名: Vector3f_Normalize
@@ -88,6 +88,25 @@ Vector3f_t Vector3f_Sub(Vector3f_t v1, Vector3f_t v2)
 }
 
 /**********************************************************************************************************
+*函 数 名: Hat_Map
+*功能说明: 向量映射到矩阵，几何运算
+*形    参: 矩阵数组头， 向量
+*返 回 值: void
+**********************************************************************************************************/
+void Hat_Map(float* mat, Vector3f_t vec)
+{
+	mat[0] = 0;
+	mat[1] = vec.z*(-1.0f);
+	mat[2] = vec.y;
+	mat[3] = vec.z;
+	mat[4] = 0;
+	mat[5] = vec.x*(-1.0f);
+	mat[6] = vec.y*(-1.0f);
+	mat[7] = vec.x;
+	mat[8] = 0;
+}
+
+/**********************************************************************************************************
 *函 数 名: VectorCrossProduct
 *功能说明: 三维向量的叉积运算
 *形    参: 向量a 向量b
@@ -122,62 +141,6 @@ Vector3f_t Matrix3MulVector3(float* m, Vector3f_t vector)
 }
 
 /**********************************************************************************************************
-*函 数 名: EulerAngleToDCM
-*功能说明: 欧拉角转方向余弦矩阵（参考系到机体系）
-*形    参: 欧拉角 矩阵指针
-*返 回 值: 无
-**********************************************************************************************************/
-void EulerAngleToDCM(Vector3f_t angle, float* dcM)
-{
-    Vector3f_t cos, sin;
-
-    cos.x = cosf(angle.x);
-    cos.y = cosf(angle.y);
-    cos.z = cosf(angle.z);
-    sin.x = sinf(angle.x);
-    sin.y = sinf(angle.y);
-    sin.z = sinf(angle.z);
-
-	dcM[0] = cos.y * cos.z;
-    dcM[1] = cos.y * sin.z;
-    dcM[2] =-sin.y;
-    dcM[3] = sin.x * sin.y * cos.z - cos.x * sin.z;
-    dcM[4] = sin.x * sin.y * sin.z + cos.x * cos.z;
-    dcM[5] = sin.x * cos.y;
-    dcM[6] = cos.x * sin.y + cos.y * sin.x * sin.z;
-    dcM[7] = cos.x * sin.y * sin.z - sin.x * cos.z;
-    dcM[8] = cos.x * cos.y;
-}
-
-/**********************************************************************************************************
-*函 数 名: EulerAngleToDCM_T
-*功能说明: 欧拉角转方向余弦矩阵（机体系到参考系）
-*形    参: 欧拉角 矩阵指针
-*返 回 值: 无
-**********************************************************************************************************/
-void EulerAngleToDCM_T(Vector3f_t angle, float* dcM)
-{
-    Vector3f_t cos, sin;
-
-    cos.x = cosf(angle.x);
-    cos.y = cosf(angle.y);
-    cos.z = cosf(angle.z);
-    sin.x = sinf(angle.x);
-    sin.y = sinf(angle.y);
-    sin.z = sinf(angle.z);
-
-    dcM[0] = cos.y * cos.z;
-    dcM[1] = sin.x * sin.y * cos.z - cos.x * sin.z;
-    dcM[2] = cos.x * sin.y + cos.y * sin.x * sin.z;
-    dcM[3] = cos.y * sin.z;
-    dcM[4] = sin.x * sin.y * sin.z + cos.x * cos.z;
-    dcM[5] = cos.x * sin.y * sin.z - sin.x * cos.z;
-    dcM[6] =-sin.y;
-    dcM[7] = sin.x * cos.y;
-    dcM[8] = cos.x * cos.y;
-}
-
-/**********************************************************************************************************
 *函 数 名: VectorRotateToBodyFrame
 *功能说明: 三维向量旋转至机体系
 *形    参: 三维向量 角度变化量（弧度）
@@ -188,7 +151,7 @@ Vector3f_t VectorRotateToBodyFrame(Vector3f_t vector, Vector3f_t deltaAngle)
     float dcMat[9];
 
     //欧拉角转为方向余弦矩阵
-    EulerAngleToDCM(deltaAngle, dcMat);
+    Euler_to_DCM_T(dcMat, deltaAngle);
 
     //方向余弦矩阵乘以向量，得到旋转后的新向量
     return Matrix3MulVector3(dcMat, vector);
@@ -205,7 +168,7 @@ Vector3f_t VectorRotateToEarthFrame(Vector3f_t vector, Vector3f_t deltaAngle)
     float dcMat[9];
 
     //欧拉角转为方向余弦矩阵
-    EulerAngleToDCM_T(deltaAngle, dcMat);
+    Euler_to_DCM(dcMat, deltaAngle);
 
     //方向余弦矩阵乘以向量，得到旋转后的新向量
     return Matrix3MulVector3(dcMat, vector);
@@ -236,4 +199,6 @@ void MagVectorToYawAngle(Vector3f_t* angle, Vector3f_t vector)
 {
     angle->z = -atan2f(vector.y, vector.x);     //偏航角
 }
+
+
 

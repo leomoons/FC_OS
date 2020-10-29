@@ -28,10 +28,10 @@ AHRS_t ahrs;
 **********************************************************************************************************/
 void MahonyAHRSinit(void)
 {
-	ahrs.q0 = 1.0f;
-	ahrs.q1 = 0.0f;
-	ahrs.q2 = 0.0f;
-	ahrs.q3 = 0.0f;
+	ahrs.quat[0] = 1.0f;
+	ahrs.quat[1] = 0.0f;
+	ahrs.quat[2] = 0.0f;
+	ahrs.quat[3] = 0.0f;
 	
 	twoKp = twoKpDef;
 	twoKi = twoKiDef;
@@ -56,7 +56,7 @@ void MahonyAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 	float halfex, halfey, halfez;
 	float qa, qb, qc;
 	
-	static uint64_t previousT;
+	static uint64_t previousT = 0.0f;
 	float deltaT = (GetSysTimeUs() - previousT) * 1e-6;
 	deltaT = ConstrainFloat(deltaT, 5e-4, 2e-3);
 	previousT = GetSysTimeUs();
@@ -85,16 +85,16 @@ void MahonyAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 		mag.z /= norm;
 		
 		//Auxiliary variables to avoid repeated arithmetic 
-		q0q0 = ahrs.q0 * ahrs.q0;
-        q0q1 = ahrs.q0 * ahrs.q1;
-        q0q2 = ahrs.q0 * ahrs.q2;
-        q0q3 = ahrs.q0 * ahrs.q3;
-        q1q1 = ahrs.q1 * ahrs.q1;
-        q1q2 = ahrs.q1 * ahrs.q2;
-        q1q3 = ahrs.q1 * ahrs.q3;
-        q2q2 = ahrs.q2 * ahrs.q2;
-        q2q3 = ahrs.q2 * ahrs.q3;
-        q3q3 = ahrs.q3 * ahrs.q3; 
+		q0q0 = ahrs.quat[0] * ahrs.quat[0];
+        q0q1 = ahrs.quat[0] * ahrs.quat[1];
+        q0q2 = ahrs.quat[0] * ahrs.quat[2];
+        q0q3 = ahrs.quat[0] * ahrs.quat[3];
+        q1q1 = ahrs.quat[1] * ahrs.quat[1];
+        q1q2 = ahrs.quat[1] * ahrs.quat[2];
+        q1q3 = ahrs.quat[1] * ahrs.quat[3];
+        q2q2 = ahrs.quat[2] * ahrs.quat[2];
+        q2q3 = ahrs.quat[2] * ahrs.quat[3];
+        q3q3 = ahrs.quat[3] * ahrs.quat[3]; 
 		
 		//Reference direction of Earth's magnetic field
 		hx = 2.0f * (mag.x * (0.5f - q2q2 - q3q3) + mag.y * (q1q2 - q0q3) + mag.z * (q1q3 + q0q2));
@@ -144,20 +144,20 @@ void MahonyAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 	gyro.x *= (0.5f * deltaT);		// pre-multiply common factors
 	gyro.y *= (0.5f * deltaT);
 	gyro.z *= (0.5f * deltaT);
-	qa = ahrs.q0;
-	qb = ahrs.q1;
-	qc = ahrs.q2;
-	ahrs.q0 += (-qb * gyro.x - qc * gyro.y - ahrs.q3 * gyro.z);
-	ahrs.q1 += (qa * gyro.x + qc * gyro.z - ahrs.q3 * gyro.y);
-	ahrs.q2 += (qa * gyro.y - qb * gyro.z + ahrs.q3 * gyro.x);
-	ahrs.q3 += (qa * gyro.z + qb * gyro.y - qc * gyro.x); 
+	qa = ahrs.quat[0];
+	qb = ahrs.quat[1];
+	qc = ahrs.quat[2];
+	ahrs.quat[0] += (-qb * gyro.x - qc * gyro.y - ahrs.quat[3] * gyro.z);
+	ahrs.quat[1] += (qa * gyro.x + qc * gyro.z - ahrs.quat[3] * gyro.y);
+	ahrs.quat[2] += (qa * gyro.y - qb * gyro.z + ahrs.quat[3] * gyro.x);
+	ahrs.quat[3] += (qa * gyro.z + qb * gyro.y - qc * gyro.x); 
 	
 	// Normalise quaternion
-	norm = Pythagorous4(ahrs.q0, ahrs.q1, ahrs.q2, ahrs.q3);
-	ahrs.q0 /= norm;
-	ahrs.q1 /= norm;
-	ahrs.q2 /= norm;
-	ahrs.q3 /= norm;
+	norm = Pythagorous4(ahrs.quat[0], ahrs.quat[1], ahrs.quat[2], ahrs.quat[3]);
+	ahrs.quat[0] /= norm;
+	ahrs.quat[1] /= norm;
+	ahrs.quat[2] /= norm;
+	ahrs.quat[3] /= norm;
 }
 
 /**********************************************************************************************************
@@ -188,9 +188,9 @@ void MahonyAHRSupdateIMU(Vector3f_t gyro, Vector3f_t acc)
 //		acc.z /= norm;        
 
 		// Estimated direction of gravity and vector perpendicular to magnetic flux
-		halfvx = ahrs.q1 * ahrs.q3 - ahrs.q0 * ahrs.q2;
-		halfvy = ahrs.q0 * ahrs.q1 + ahrs.q2 * ahrs.q3;
-		halfvz = ahrs.q0 * ahrs.q0 - 0.5f + ahrs.q3 * ahrs.q3;
+		halfvx = ahrs.quat[1] * ahrs.quat[3] - ahrs.quat[0] * ahrs.quat[2];
+		halfvy = ahrs.quat[0] * ahrs.quat[1] + ahrs.quat[2] * ahrs.quat[3];
+		halfvz = ahrs.quat[0] * ahrs.quat[0] - 0.5f + ahrs.quat[3] * ahrs.quat[3];
 	
 		// Error is sum of cross product between estimated and measured direction of gravity
 		halfex = (acc.y * halfvz - acc.z * halfvy);
@@ -222,56 +222,35 @@ void MahonyAHRSupdateIMU(Vector3f_t gyro, Vector3f_t acc)
 	gyro.x *= (0.5f * deltaT);		// pre-multiply common factors
 	gyro.y *= (0.5f * deltaT);
 	gyro.z *= (0.5f * deltaT);
-	qa = ahrs.q0;
-	qb = ahrs.q1;
-	qc = ahrs.q2;
-	ahrs.q0 += (-qb * gyro.x - qc * gyro.y - ahrs.q3 * gyro.z);
-	ahrs.q1 += (qa * gyro.x + qc * gyro.z - ahrs.q3 * gyro.y);
-	ahrs.q2 += (qa * gyro.y - qb * gyro.z + ahrs.q3 * gyro.x);
-	ahrs.q3 += (qa * gyro.z + qb * gyro.y - qc * gyro.x); 
+	qa = ahrs.quat[0];
+	qb = ahrs.quat[1];
+	qc = ahrs.quat[2];
+	ahrs.quat[0] += (-qb * gyro.x - qc * gyro.y - ahrs.quat[3] * gyro.z);
+	ahrs.quat[1] += (qa * gyro.x + qc * gyro.z - ahrs.quat[3] * gyro.y);
+	ahrs.quat[2] += (qa * gyro.y - qb * gyro.z + ahrs.quat[3] * gyro.x);
+	ahrs.quat[3] += (qa * gyro.z + qb * gyro.y - qc * gyro.x); 
 	
 	// Normalise quaternion
-	norm = Pythagorous4(ahrs.q0, ahrs.q1, ahrs.q2, ahrs.q3);
-	ahrs.q0 /= norm;
-	ahrs.q1 /= norm;
-	ahrs.q2 /= norm;
-	ahrs.q3 /= norm;
+	norm = Pythagorous4(ahrs.quat[0], ahrs.quat[1], ahrs.quat[2], ahrs.quat[3]);
+	ahrs.quat[0] /= norm;
+	ahrs.quat[1] /= norm;
+	ahrs.quat[2] /= norm;
+	ahrs.quat[3] /= norm;
 }
 
 
 /**********************************************************************************************************
 *函 数 名: GetDCM
 *功能说明: 获取方向余弦矩阵
-*形    参: 无
-*返 回 值: 旋转矩阵的数值向量
+*形    参: 旋转矩阵数组头
+*返 回 值: 无
 **********************************************************************************************************/
-float* GetDCM(void)
+void GetDCM(float* dcm)
 {
-	//Auxiliary variables to avoid repeated arithmetic 
-	float q0q0 = ahrs.q0 * ahrs.q0;
-    float q0q1 = ahrs.q0 * ahrs.q1;
-    float q0q2 = ahrs.q0 * ahrs.q2;
-    float q0q3 = ahrs.q0 * ahrs.q3;
-    float q1q1 = ahrs.q1 * ahrs.q1;
-    float q1q2 = ahrs.q1 * ahrs.q2;
-    float q1q3 = ahrs.q1 * ahrs.q3;
-	float q2q2 = ahrs.q2 * ahrs.q2;
-    float q2q3 = ahrs.q2 * ahrs.q3;
-    float q3q3 = ahrs.q3 * ahrs.q3; 
 	
-    ahrs._dcm[0] = 1 - (2*q2q2 + 2*q3q3);
-    ahrs._dcm[1] = 2*q1q2 - 2*q0q3;
-    ahrs._dcm[2] = 2*q1q3 + 2*q0q2;
-		
-    ahrs._dcm[3] = 2*q1q2 + 2*q0q3;
-    ahrs._dcm[4] = 1 - (2*q1q1 + 2*q3q3);
-    ahrs._dcm[5] = 2*q2q3 - 2*q0q1;
-		
-    ahrs._dcm[6] = 2*q1q3 - 2*q0q2;
-    ahrs._dcm[7] = 2*q2q3 + 2*q0q1;
-    ahrs._dcm[8] = 1 - (2*q1q1 + 2*q2q2);
+	Quater_to_DCM(ahrs._dcm, ahrs.quat);
 	
-	return ahrs._dcm;
+	Matrix3_Copy(ahrs._dcm, dcm);
 }
 
 
@@ -283,14 +262,8 @@ float* GetDCM(void)
 **********************************************************************************************************/
 Vector3f_t GetEuler(void)
 {
-	float tmp = LIMIT(1-Sq(ahrs._dcm[6]), 0, 1);
+	ahrs.euler = Quater_to_Euler(ahrs.quat);
 	
-	if(abs(ahrs._dcm[8]) > 0.0f)	//避免奇点的运算
-	{
-		ahrs.euler.x = fast_atan2(ahrs._dcm[6], Sqrt(tmp));
-		ahrs.euler.y = fast_atan2(ahrs._dcm[7], ahrs._dcm[8]);
-		ahrs.euler.z =-fast_atan2(ahrs._dcm[3], ahrs._dcm[0]);
-	}
 	return ahrs.euler;
 }
 

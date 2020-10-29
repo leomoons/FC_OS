@@ -8,5 +8,8 @@ void Matrix3_Mul(float* a,float* b,float* c);
 void Matrix3_Copy(float* a, float* b);
 void Matrix3_Tran(float* a, float* b);
 void Matrix3_Inv(float* a,float* b);
+void Matrix3_Eye(float* a);
+uint8_t isDCM(float* dcm);
+
 
 #endif

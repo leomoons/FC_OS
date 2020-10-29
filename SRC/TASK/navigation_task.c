@@ -43,8 +43,8 @@ portTASK_FUNCTION(vNavigationTask, pvParameters)
 	//唤醒调度器
 	xTaskResumeAll();
 	
-	float *dcmat;
-	Vector3f_t eulers;
+//	float *dcmat;
+//	Vector3f_t eulers;
 	
 	xLastWakeTime = xTaskGetTickCount();
 	while(1)
@@ -57,8 +57,8 @@ portTASK_FUNCTION(vNavigationTask, pvParameters)
 		//Vector3f_t vecTmp; vecTmp.x=0.0f; vecTmp.y=0.0f; vecTmp.z=0.0f;
 		MahonyAHRSupdate(*gyro, *acc, MagGetData());
 
-		dcmat = GetDCM();
-		eulers = GetEuler();
+//		dcmat = GetDCM();
+//		eulers = GetEuler();
 		
 		//AnoAHRSupdate(*gyro, *acc, MagGetData());
 		

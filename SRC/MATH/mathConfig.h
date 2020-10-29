@@ -9,8 +9,10 @@
 #define __MATHCONFIG_H
 
 #include "mathTool.h"
-#include "matrix3.h"
 #include "vector3.h"
+#include "matrix3.h"
+#include "matrix6.h"
+#include "transition.h"
 #include "rotation.h"
 #include "LevenbergMarquardt.h"
 #include "LowPassFilter.h"

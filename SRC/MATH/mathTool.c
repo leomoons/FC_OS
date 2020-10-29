@@ -337,12 +337,12 @@ float WrapDegree360(float angle)
 }
 
 /**********************************************************************************************************
-*函 数 名: ApplyDeadbandInt
-*功能说明: 应用死区
+*函 数 名: ApplyDeadbandShort
+*功能说明: 应用死区(short型)
 *形    参: 输入值 死区大小
 *返 回 值: 处理后的值
 **********************************************************************************************************/
-int32_t ApplyDeadbandInt(int32_t value, int32_t deadband)
+int16_t ApplyDeadbandShort(int16_t value, int16_t deadband)
 {
     if (abs(value) < deadband)
     {

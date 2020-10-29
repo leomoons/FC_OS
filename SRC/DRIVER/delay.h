@@ -6,7 +6,7 @@ void DelayInit(u8 SYSCLK);
 void DelayUs(u32 nus);
 void DelayMs(u32 nms);
 void DelayXms(u32 nms);
-void OsDelayMs(uint32_t ms);
+void OsDelayTick(uint32_t tick);
 
 uint64_t GetSysTimeUs(void);
 uint32_t GetSysTimeMs(void);
