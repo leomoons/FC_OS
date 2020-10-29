@@ -187,6 +187,16 @@ void USART2_IRQHandler(void)
   * @param  None
   * @retval None
   */
+void USART3_IRQHandler(void)
+{
+	Usart3_IRQ();
+}
+
+/**
+  * @brief  This function handles USART6 interrupt request.
+  * @param  None
+  * @retval None
+  */
 #include "drv_sbus.h"
 void USART6_IRQHandler(void)
 {
