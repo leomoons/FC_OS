@@ -3,12 +3,13 @@
 #include "mathConfig.h"
 
 
-//IMU中的数据通过队列传递，其他传感器定义好读取函数接口 (*DataRead函数)
-
 void IMUSensorInit(void);
-void GyroDataUpdate(Vector3f_t *gyro);
-void AccDataUpdate(Vector3f_t *acc);
-void IMUTempUpdate(float* temp);
+void GyroDataUpdate(void);
+void AccDataUpdate(void);
+void IMUtempUpdate(void);
+void GyroDataRead(Vector3f_t *gyro);
+void AccDataRead(Vector3f_t *acc);
+void IMUtempRead(float* temp);
 
 void MagSensorInit(void);
 void MagDataUpdate(void);

@@ -76,7 +76,7 @@ void AccPreTreatInit(void)
 *返 回 值: 无
 **********************************************************************************************************/
 float ACCDATAX, ACCDATAY, ACCDATAZ, ACCLPFX, ACCLPFY, ACCLPFZ;
-void AccDataPreTreat(Vector3f_t accRaw, Vector3f_t* accData)
+void AccDataPreTreat(Vector3f_t accRaw, Vector3f_t* accPre)
 {
 	static float lastAccMag, accMagderi;
 	const float deltaT = 0.001f;
@@ -108,7 +108,7 @@ void AccDataPreTreat(Vector3f_t accRaw, Vector3f_t* accData)
 	lastAccMag = _acc.mag;
 	_acc.vibraCoef = _acc.vibraCoef * 0.9995f + abs(accMagderi) * 0.0005f;
 	
-	*accData = _acc.data;
+	*accPre = _acc.data;
 }
 
 /**********************************************************************************************************

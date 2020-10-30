@@ -9,8 +9,12 @@ void ICM20602_Init(void);
 //void ICM20602_SingleWrite(uint8_t reg, uint8_t value);
 //void ICM20602_MultiRead(uint8_t reg, uint8_t *data, uint8_t len);
 
-void ICM20602_UpdateAcc(Vector3f_t* acc);
-void ICM20602_UpdateGyro(Vector3f_t* gyro);
-void ICM20602_UpdateTemp(float* temp);
+void ICM20602_UpdateAcc(void);
+void ICM20602_UpdateGyro(void);
+void ICM20602_UpdateTemp(void);
+
+void ICM20602_ReadAcc(Vector3f_t *acc);
+void ICM20602_ReadGyro(Vector3f_t *gyro);
+void ICM20602_ReadTemp(float *temp);
 
 #endif 

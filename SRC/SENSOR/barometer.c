@@ -18,17 +18,16 @@ BAROMETER_t _baro;
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
-void BaroDataPreTreat(void)
+void BaroDataPreTreat(float baroPresRaw, float baroTempRaw)
 {
 	static uint64_t lastTime = 0;
 	
 	float deltaT = (GetSysTimeUs() - lastTime) * 1e-6;
 	lastTime = GetSysTimeUs();
 	
-	//读取气压
-	BaroPresRead(&_baro.pressure);
-	//读取气压计温度
-	BaroTempRead(&_baro.temperature);
+	_baro.pressure = baroPresRaw;
+	_baro.temperature = baroTempRaw;
+	
 	
 	//计算气压计高度
 	float alt_3, baroAltTemp;

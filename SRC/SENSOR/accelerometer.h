@@ -14,7 +14,7 @@ typedef struct {
 } ACCELEROMETER_t;
 
 void AccPreTreatInit(void);
-void AccDataPreTreat(Vector3f_t accRaw, Vector3f_t* accData);
+void AccDataPreTreat(Vector3f_t accRaw, Vector3f_t* accPre);
 void AccCalibration(Vector3f_t accRaw);
 void ImuLevelCalibration(void);
 

@@ -121,6 +121,10 @@
 #define MPU_G_s2000dps           ((float)0.0610370f)  //dps/LSB
 
 
+Vector3i_t accRaw;
+Vector3i_t gyroRaw;
+int16_t tempRaw;
+
 /**********************************************************************************************************
 *函 数 名: ICM20602_CS
 *功能说明: ICM20602传感器CS脚使能或失能
@@ -253,79 +257,102 @@ void ICM20602_Init(void)
 
 /**********************************************************************************************************
 *函 数 名: ICM20602_UpdateAcc
-*功能说明: ICM20602更新加速度传感器数据，并转化为单位重力加速度g
-*形    参: 读出数据指针
+*功能说明: ICM20602更新加速度传感器原始数据
+*形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
 //uint8_t ACCbuffer[6];
-//Vector3i_t accRaw;
-void ICM20602_UpdateAcc(Vector3f_t* acc)
+void ICM20602_UpdateAcc(void)
 {
 	uint8_t ACCbuffer[6];
-	Vector3i_t accRaw;
 	
 	ICM20602_MultiRead(MPU_RA_ACCEL_XOUT_H, ACCbuffer, 6);//连续接受6个ICM20602寄存器的数据
 	accRaw.x = (s16)((((u16)ACCbuffer[0]) << 8) | ACCbuffer[1]);
 	accRaw.y = (s16)((((u16)ACCbuffer[2]) << 8) | ACCbuffer[3]);
     accRaw.z = (s16)((((u16)ACCbuffer[4]) << 8) | ACCbuffer[5]);
 	
-	//转化为右手系，单位转化为单位重力加速度
-    acc->x = (float)accRaw.x * MPU_A_16mg;
-    acc->y = (float)accRaw.y * MPU_A_16mg;
-    acc->z =-(float)accRaw.z * MPU_A_16mg;
-//	acc->x = (float)accRaw.x;
-//    acc->y = (float)accRaw.y;
-//    acc->z = (float)accRaw.z;
-	
 	DelayUs(1);
 }
 
 /**********************************************************************************************************
 *函 数 名: ICM20602_UpdateGyro
-*功能说明: ICM20602更新陀螺仪传感器数据，并转化为标准单位
-*形    参: 读出数据指针
+*功能说明: ICM20602更新陀螺仪传感器原始数据
+*形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
 //uint8_t GYRObuffer[6];
-//Vector3i_t gyroRaw;
-void ICM20602_UpdateGyro(Vector3f_t* gyro)
+void ICM20602_UpdateGyro(void)
 {
 	uint8_t GYRObuffer[6];
-	Vector3i_t gyroRaw;
+	
 	
 	ICM20602_MultiRead(MPU_RA_GYRO_XOUT_H, GYRObuffer, 6);
 	gyroRaw.x = (s16)((((u16)GYRObuffer[0]) << 8) | GYRObuffer[1]);
     gyroRaw.y = (s16)((((u16)GYRObuffer[2]) << 8) | GYRObuffer[3]);
     gyroRaw.z = (s16)((((u16)GYRObuffer[4]) << 8) | GYRObuffer[5]);
 	
-	//转化为右手系，单位转化为dps(度每秒)
-    gyro->x = (float)gyroRaw.x * MPU_G_s2000dps * DEG_TO_RAD;
-    gyro->y = (float)gyroRaw.y * MPU_G_s2000dps * DEG_TO_RAD;
-    gyro->z = (float)gyroRaw.z * MPU_G_s2000dps * DEG_TO_RAD;
-//	gyro->x = (float)gyroRaw.x;
-//    gyro->y = (float)gyroRaw.y;
-//    gyro->z = (float)gyroRaw.z;
-	
 	DelayUs(1);
 }
 
 /**********************************************************************************************************
 *函 数 名: ICM20602_UpdateTemp
-*功能说明: ICM20602更新温度传感器数据
-*形    参: 读出数据指针
+*功能说明: ICM20602更新温度传感器原始数据
+*形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
 //uint8_t TEMPbuffer[2];
-//int16_t temperature;
-void ICM20602_UpdateTemp(float* temp)
+void ICM20602_UpdateTemp(void)
 {
 	uint8_t TEMPbuffer[2];
-    static int16_t temperature;
-	
+    
 	ICM20602_MultiRead(MPU_RA_TEMP_OUT_H, TEMPbuffer, 2);
-	temperature = ((((int16_t)TEMPbuffer[0]) << 8) | TEMPbuffer[1]);
-	
-	*temp = 25.0f + (float)temperature / 326.8f;
-	
+	tempRaw = ((((int16_t)TEMPbuffer[0]) << 8) | TEMPbuffer[1]);
 	DelayUs(1);
+}
+
+/**********************************************************************************************************
+*函 数 名: ICM20602_ReadAcc
+*功能说明: 读取ICM20602加速度原始数据，并转化为单位重力加速度g（归一化）
+*形    参: 加速度向量指针
+*返 回 值: 无
+**********************************************************************************************************/
+void ICM20602_ReadAcc(Vector3f_t* acc)
+{
+	//转化为右手系，单位转化为单位重力加速度
+    acc->x = (float)accRaw.x * MPU_A_16mg;
+    acc->y = (float)accRaw.y * MPU_A_16mg;
+    acc->z =-(float)accRaw.z * MPU_A_16mg;
+//	acc->x = (float)accRaw.x;
+//  acc->y = (float)accRaw.y;
+//  acc->z = (float)accRaw.z;
+	
+}
+
+/**********************************************************************************************************
+*函 数 名: ICM20602_ReadGyro
+*功能说明: 读取ICM20602陀螺仪原始数据，并转化单位为rad/s
+*形    参: 角速度向量指针
+*返 回 值: 无
+**********************************************************************************************************/
+void ICM20602_ReadGyro(Vector3f_t* gyro)
+{	
+	//转化为右手系，单位转化为dps(度每秒)
+    gyro->x = (float)gyroRaw.x * MPU_G_s2000dps * DEG_TO_RAD;
+    gyro->y = (float)gyroRaw.y * MPU_G_s2000dps * DEG_TO_RAD;
+    gyro->z = (float)gyroRaw.z * MPU_G_s2000dps * DEG_TO_RAD;
+//	gyro->x = (float)gyroRaw.x;
+//  gyro->y = (float)gyroRaw.y;
+//  gyro->z = (float)gyroRaw.z;
+
+}
+
+/**********************************************************************************************************
+*函 数 名: ICM20602_ReadTemp
+*功能说明: ICM20602更新温度传感器数据，转化单位为摄氏度
+*形    参: 温度变量指针
+*返 回 值: 无
+**********************************************************************************************************/
+void ICM20602_ReadTemp(float* temp)
+{
+	*temp = 25.0f + (float)tempRaw / 326.8f;
 }

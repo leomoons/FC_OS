@@ -74,19 +74,15 @@ void MagPreTreatInit(void)
 *返 回 值: 无
 **********************************************************************************************************/
 Vector3f_t MAGRAW1;
-void MagDataPreTreat(void)
+void MagDataPreTreat(Vector3f_t magRaw, Vector3f_t* magPre)
 {
-	Vector3f_t magRaw;
-	
-	//获取磁力计传感器采样值
-	MagDataRead(&magRaw);
 	MAGRAW1 = magRaw;
 
 	
 	//磁力计数据校准
-	_mag.data.x = (magRaw.x - _mag.cali.offset.x) * _mag.cali.scale.x;
-    _mag.data.y = (magRaw.y - _mag.cali.offset.y) * _mag.cali.scale.y;
-    _mag.data.z = (magRaw.z - _mag.cali.offset.z) * _mag.cali.scale.z;
+	magPre->x = _mag.data.x = (magRaw.x - _mag.cali.offset.x) * _mag.cali.scale.x;
+    magPre->y = _mag.data.y = (magRaw.y - _mag.cali.offset.y) * _mag.cali.scale.y;
+    magPre->z = _mag.data.z = (magRaw.z - _mag.cali.offset.z) * _mag.cali.scale.z;
 	
 	//计算磁场强度模值，用于判断周边是否存在磁场干扰（正常值为1）
 	_mag.mag = _mag.mag * 0.9f + Pythagorous3(_mag.data.x, _mag.data.y, _mag.data.z) / _mag.earthMag * 0.01f;
@@ -99,14 +95,13 @@ void MagDataPreTreat(void)
 *形    参: 磁力计原始数据
 *返 回 值: 无
 **********************************************************************************************************/
-void MagCalibration(void)
+void MagCalibration(Vector3f_t magRaw)
 {
 	static Vector3f_t samples[6];
     static uint32_t cnt_m=0;
     static float cali_rotate_angle = 0;
     static Vector3f_t new_offset;
     static Vector3f_t new_scale;
-    Vector3f_t magRaw;
     static float earthMag = 0;
 	
 	//计算时间间隔，用于积分
@@ -116,8 +111,7 @@ void MagCalibration(void)
 	
 	if(_mag.cali.should_cali)
 	{
-		//读取罗盘数据
-		MagDataRead(&magRaw);
+
 		
 		//校准分两个阶段：1.水平旋转 2.机头朝上或朝下然后水平旋转
 		//两个阶段分别对飞机的z轴和x轴陀螺仪数据进行积分，记录旋转过的角度

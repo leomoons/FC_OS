@@ -86,47 +86,42 @@ static void AK8975_Trig(void)
 
 /**********************************************************************************************************
 *函 数 名: AK8975_Update
-*功能说明: AK8975读取磁罗盘数据
+*功能说明: AK8975更新磁罗盘原始数据
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
 void AK8975_Update(void)
 {
-	uint8_t MAGbuffer[6];
+	uint8_t MagBuffer[6];
+	//AK8975_Trig();	//转换到采样模式
 	AK8975_CS(1);
 	Spi2_ReadWriteByte(AK8975_HXL_REG | 0x80);
 	for(u8 i=0; i<6; i++)
-		MAGbuffer[i] = Spi2_ReadWriteByte(0xff);
+		MagBuffer[i] = Spi2_ReadWriteByte(0xff);
 	AK8975_CS(0);
-	
-	//数据类型转换以及转换到WNU（东北天）
-	magRaw.x = ((((int16_t)MAGbuffer[1]) << 8) | MAGbuffer[0]);
-	magRaw.y = ((((int16_t)MAGbuffer[3]) << 8) | MAGbuffer[2]);
-	magRaw.z = ((((int16_t)MAGbuffer[5]) << 8) | MAGbuffer[4]);
-
 	AK8975_Trig();	//转换到采样模式
+	//数据类型转换以及转换到WNU（东北天）
+	magRaw.x = ((((int16_t)MagBuffer[1]) << 8) | MagBuffer[0]);
+	magRaw.y = ((((int16_t)MagBuffer[3]) << 8) | MagBuffer[2]);
+	magRaw.z = ((((int16_t)MagBuffer[5]) << 8) | MagBuffer[4]);
+
+	
+	
 }
+
 
 /**********************************************************************************************************
 *函 数 名: AK8975_ReadMag
-*功能说明: 其他文件获得磁感应强度的接口
-*形    参: 读出数据指针
+*功能说明: 读取AK8975原始磁场数据，并转化单位为uT
+*形    参: 磁场向量指针
 *返 回 值: 无
 **********************************************************************************************************/
-//Vector3i_t magRAW2;
-void AK8975_ReadMag(Vector3f_t* mag)
+void AK8975_ReadMag(Vector3f_t *mag)
 {
 	mag->x = (float)magRaw.x * AK8975_MAG_TO_UTESLA;
 	mag->y = (float)magRaw.y * AK8975_MAG_TO_UTESLA;
 	mag->z = (float)magRaw.z * AK8975_MAG_TO_UTESLA;
-	
-//	magRAW2.x = magRaw.x;
-//	magRAW2.y = magRaw.y;
-//	magRAW2.z = magRaw.z;
 }
-
-
-
 
 
 

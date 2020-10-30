@@ -11,7 +11,7 @@ typedef struct{
 	float temperature;
 }BAROMETER_t;
 
-void BaroDataPreTreat(void);
+void BaroDataPreTreat(float baroPresRaw, float baroTempRaw);
 float BaroGetAlt(void);
 float BaroGetTemp(void);
 float BaroGetVelocity(void);
