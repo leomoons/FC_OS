@@ -37,29 +37,29 @@ int main()
 		cnt++;	
 		
 		//test1: 直接读取传感器的原始数据
-//		if(cnt%20 == 0)
-//		{
-//			SPL0601_Update();
-//			SPL0601_ReadPres(&presR);
-//			SPL0601_ReadTemp(&tempR);
-//		}
+		if(cnt%20 == 0)		//50Hz
+		{
+			SPL0601_Update();
+			SPL0601_ReadPres(&presR);
+			SPL0601_ReadTemp(&tempR);
+		}
 		
 		//test2: 通过module文件这个接口来更新数据
-		if(cnt%20 == 0)
-		{
-			BaroDataUpdate();
-			BaroPresRead(&presR);
-			BaroTempRead(&tempR);
-		}
+//		if(cnt%20 == 0)		//50Hz
+//		{
+//			BaroDataUpdate();
+//			BaroPresRead(&presR);
+//			BaroTempRead(&tempR);
+//		}
 		
 		
 		//test3: 气压计数据预处理
-		if(cnt%40 == 0)
-		{
-			BaroDataPreTreat();
-		}
+//		if(cnt%40 == 0)
+//		{
+//			BaroDataPreTreat();
+//		}
 		
 		
-		DelayUs(999);
+		DelayXms(1);
 	}
 }

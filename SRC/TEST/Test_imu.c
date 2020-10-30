@@ -10,11 +10,12 @@
 #include "LYHdecode.h"
 #include "parameter.h"
 #include "w25qxx.h"
+#include "ak8975.h"
 
 #include "sensor.h"
 #include "accelerometer.h"
 #include "gyroscope.h"
-
+#include "magnetometer.h"
 
 Vector3f_t gyroR, gyroM , gyroTreat, gyroLpf;
 Vector3f_t accR, accM, accTreat;
@@ -29,31 +30,37 @@ int main()
 	Spi1_Init();
 	W25QXX_Init();
 	ParamInit();
-	
-	//初始化icm20602
 	Spi2_Init();
 	
+	//初始化icm20602
 //	ICM20602CSPin_Init();
 //	ICM20602_Init();
 	IMUSensorInit();
 	
 	AccPreTreatInit();
 	GyroPreTreatInit();
+
+	
 	
 	uint32_t cnt = 0;
 	while(1)
 	{	
 		cnt++;
-		//test1: icm20602芯片原始数据更新
-		ICM20602_UpdateGyro(&gyroR);
-		ICM20602_UpdateAcc(&accR);
-		ICM20602_UpdateTemp(&tempR);
-		
+		//test1: icm20602芯片原始数据更新，向量方向没有旋转修正
+//		ICM20602_UpdateGyro();
+//		ICM20602_UpdateAcc();
+//		ICM20602_UpdateTemp();
+//		ICM20602_ReadAcc(&accR);
+//		ICM20602_ReadGyro(&gyroR);
+//		ICM20602_ReadTemp(&tempR);
 		
 		//test2: 通过module文件这个接口来更新数据
-		GyroDataUpdate(&gyroM);
-		AccDataUpdate(&accM);
-		IMUTempUpdate(&tempM);
+		AccDataUpdate();
+		GyroDataUpdate();
+		IMUtempUpdate();
+		AccDataRead(&accR);
+		GyroDataRead(&gyroR);
+		IMUtempRead(&tempR);
 		
 		
 		//test3: 加速度计和陀螺仪数据处理：校准，低通滤波
@@ -76,6 +83,6 @@ int main()
 //		GyroDataPreTreat(gyroR, tempR, &gyroTreat, &gyroLpf);
 		
 		
-		DelayMs(2);
+		DelayXms(1);
 	}
 }

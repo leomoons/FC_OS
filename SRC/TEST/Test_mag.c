@@ -17,84 +17,57 @@
 #include "gyroscope.h"
 #include "magnetometer.h"
 
-Vector3f_t gyro, gyroTreat, gyroLpf;
-Vector3f_t acc, accTreat;
+Vector3f_t gyroR;
+Vector3f_t accR;
 Vector3f_t magR;
-float temp;
 
 int main()
 {
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+ 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 	DelayInit(168);
 	RGB_Init();
 	Usart2_Init(500000);
 	Spi1_Init();
 	W25QXX_Init();
 	ParamInit();
+	
+	//初始化icm20602
 	Spi2_Init();
 	
 	IMUSensorInit();
-	AccPreTreatInit();
-	GyroPreTreatInit();
+	//DelayUs(10);
+	//AccPreTreatInit();
+	//GyroPreTreatInit();
 	
 	MagSensorInit();
-	MagPreTreatInit();
 	
 	uint32_t cnt = 0;
 	while(1)
 	{	
 		cnt++;
 		
-		//串口发送命令开启校准
-		if(cnt%10 == 0)
+		//更新和读取IMU数据用于磁罗盘校准
+		AccDataUpdate();
+		GyroDataUpdate();
+		//DelayUs(1000);
+		AccDataRead(&accR);
+		GyroDataRead(&gyroR);
+		
+		
+		// test1: 通过ak8975文件来更新和读取磁场数据，向量方向没有旋转修整
+		if(cnt%10 == 0)		//100Hz
 		{
-			LYH_Receive_Loop();
-			RGB_Flash();
-			ImuOrientationDetect();
-		}
-		if(cnt%50==0)
-		{
-			ParamSaveToFlash();
+			AK8975_Update();
+			AK8975_ReadMag(&magR);
 		}
 		
-		
-		
-		//test1: 直接读取传感器的原始数据
-//		if(cnt%10 == 0)
+		// test2: 通过module接口来更新数据
+//		if(cnt%10 == 0)		//100Hz
 //		{
-//			AK8975_Update();
-//			AK8975_ReadMag(&magR);
+//			MagDataUpdate();
+//			MagDataRead(&magR);
 //		}
-//		
-		//test2: 通过module文件这个接口来更新数据
-		if(cnt%10 == 0)
-		{
-			MagDataUpdate();
-			MagDataRead(&magR);
-		}
 		
-		
-		//test3: 加速度计和陀螺仪数据处理：校准等
-		if(cnt%10 == 0)
-		{
-			MagCalibration();
-			MagDataPreTreat();
-		}
-		
-		
-		GyroDataUpdate(&gyro);
-		AccDataUpdate(&acc);
-		IMUTempUpdate(&temp);
-		//加速度计数据处理
-		AccCalibration(acc); 
-		AccDataPreTreat(acc, &accTreat);
-		ImuLevelCalibration();
-		//陀螺仪数据处理
-		GyroCalibration(gyro);
-		GyroDataPreTreat(gyro, temp, &gyroTreat, &gyroLpf);
-//		
-		
-		
-		DelayUs(999);
+		DelayXms(1);
 	}
 }
