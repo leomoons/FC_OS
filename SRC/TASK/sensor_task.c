@@ -31,6 +31,7 @@ portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 {
 	portTickType xLastWakeTime;
 	
+	//消息队列传递的数据
 	Vector3f_t* gyroRaw;
 	Vector3f_t* accRaw;
 	float* tempRaw;
@@ -100,6 +101,13 @@ portTASK_FUNCTION(vOtherPretreatTask, pvParameters)
 	portTickType xLastWakeTime;
 	static uint16_t cnt = 0;
 	
+	//消息队列传递的数据
+	Vector3f_t *magRaw;
+	Vector3f_t *gyroLpf;
+	float *baroPresRaw;
+	float *baroTempRaw;
+	Vector3f_t *magPre = pvPortMalloc(sizeof(Vector3f_t));
+	
 	//挂起调度器
 	vTaskSuspendAll();
 	
@@ -113,21 +121,28 @@ portTASK_FUNCTION(vOtherPretreatTask, pvParameters)
 	
 	while(1)
 	{
+		cnt++;
 		//100Hz
 		if(cnt%2 == 0)
 		{
+			xQueueReceive(messageQueue[MAG_SENSOR_READ], &magRaw, (3/portTICK_RATE_MS));
+			xQueuePeek(messageQueue[GYRO_LPF], &gyroLpf, (3/portTICK_RATE_MS));
 			//磁力计校准
-			MagCalibration();
+			MagCalibration(*magRaw, *gyroLpf);
 			
 			//磁力计数据预处理
-			MagDataPreTreat();
+			MagDataPreTreat(*magRaw, magPre);
+			
+			xQueueSendToBack(messageQueue[MAG_PRETREAT], (void *)&magPre, (3/portTICK_RATE_MS));
 		}
 		
 		//25Hz
 		if(cnt%8 == 0)
 		{
+			xQueueReceive(messageQueue[BARO_PRES_READ], &baroPresRaw, (3/portTICK_RATE_MS));
+			xQueueReceive(messageQueue[BARO_TEMP_READ], &baroTempRaw, (3/portTICK_RATE_MS));
 			//气压高度数据预处理
-			BaroDataPreTreat();
+			BaroDataPreTreat(*baroPresRaw, *baroTempRaw);
 		}
 		
 		//睡眠5ms

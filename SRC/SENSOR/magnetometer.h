@@ -13,7 +13,7 @@ typedef struct {
 
 void MagPreTreatInit(void);
 void MagDataPreTreat(Vector3f_t magRaw, Vector3f_t *magPre);
-void MagCalibration(Vector3f_t magRaw);
+void MagCalibration(Vector3f_t magRaw, Vector3f_t gyroPre);
 Vector3f_t MagGetData(void);
 void MagCalibrateEnable(void);
 

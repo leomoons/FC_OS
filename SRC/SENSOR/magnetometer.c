@@ -7,7 +7,7 @@
 **********************************************************************************************************/
 #include "magnetometer.h"
 #include "parameter.h"
-#include "mathTool.h"
+#include "mathConfig.h"
 #include "LevenbergMarquardt.h"
 #include "ak8975.h"
 #include "delay.h"
@@ -95,11 +95,11 @@ void MagDataPreTreat(Vector3f_t magRaw, Vector3f_t* magPre)
 *形    参: 磁力计原始数据
 *返 回 值: 无
 **********************************************************************************************************/
-void MagCalibration(Vector3f_t magRaw)
+void MagCalibration(Vector3f_t magRaw, Vector3f_t gyroLpf)
 {
 	static Vector3f_t samples[6];
     static uint32_t cnt_m=0;
-    static float cali_rotate_angle = 0;
+    static float cali_rotate_angle = 0.0f;
     static Vector3f_t new_offset;
     static Vector3f_t new_scale;
     static float earthMag = 0;
@@ -117,12 +117,12 @@ void MagCalibration(Vector3f_t magRaw)
 		//两个阶段分别对飞机的z轴和x轴陀螺仪数据进行积分，记录旋转过的角度
 		if(_mag.cali.step == 1)
 		{
-			cali_rotate_angle += GyroGetData().z * deltaT;
+			cali_rotate_angle += gyroLpf.z * deltaT;
 			
 		}
 		else if(_mag.cali.step == 2)
 		{
-			cali_rotate_angle += GyroGetData().x * deltaT;
+			cali_rotate_angle += gyroLpf.x * deltaT;
 		}
 		
 		if(cnt_m == 0)

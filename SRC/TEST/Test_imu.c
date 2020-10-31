@@ -17,8 +17,8 @@
 #include "gyroscope.h"
 #include "magnetometer.h"
 
-Vector3f_t gyroR, gyroM , gyroTreat, gyroLpf;
-Vector3f_t accR, accM, accTreat;
+Vector3f_t gyroR, gyroP, gyroLpf;
+Vector3f_t accR, accP;
 float tempR, tempM;
 
 int main()
@@ -46,6 +46,21 @@ int main()
 	while(1)
 	{	
 		cnt++;
+		
+		//串口发送指令开启校准，飞控朝向判断
+		if(cnt%10 == 0)		//100Hz
+		{
+			LYH_Receive_Loop();
+			ImuOrientationDetect();
+		}
+		
+		//参数写入flash
+		if(cnt%1000 == 0)
+		{
+			//Param_save_cnt_tox(1);
+			ParamSaveToFlash();
+		}
+			
 		//test1: icm20602芯片原始数据更新，向量方向没有旋转修正
 //		ICM20602_UpdateGyro();
 //		ICM20602_UpdateAcc();
@@ -64,25 +79,18 @@ int main()
 		
 		
 		//test3: 加速度计和陀螺仪数据处理：校准，低通滤波
-//		if(cnt%10 == 0)
-//		{
-//			LYH_Receive_Loop();
-//			RGB_Flash();
-//			ImuOrientationDetect();
-//		}
-//		if(cnt%50==0)
-//		{
-//			ParamSaveToFlash();
-//		}
-//		//加速度计数据处理
-//		AccCalibration(accR);
-//		AccDataPreTreat(accR, &accTreat);
-//		ImuLevelCalibration();
-//		//陀螺仪数据处理
-//		GyroCalibration(gyroR);
-//		GyroDataPreTreat(gyroR, tempR, &gyroTreat, &gyroLpf);
+		//加速度计校准和数据预处理
+		ImuLevelCalibration();
+		AccCalibration(accR);
+		AccDataPreTreat(accR, &accP);
+		
+		//陀螺仪校准和数据预处理
+		GyroCalibration(gyroR);
+		GyroDataPreTreat(gyroR, tempR, &gyroP, &gyroLpf);
 		
 		
+		if(cnt%5 == 0)
+			RGB_Flash();		//200Hz
 		DelayXms(1);
 	}
 }

@@ -409,8 +409,8 @@ void ImuLevelCalibration(void)
 		//加速度向量转化为姿态角
 		AccVectorToRollPitchAngle(&caliTemp, accAverage);
 		
-		float tmp = SafeArcsin(1.0);
-		tmp = atan2f(1.0,1.0);
+//		float tmp = SafeArcsin(1.0);
+//		tmp = atan2f(1.0,1.0);
 		
 		if(abs(Degrees(caliTemp.x))<10 && abs(Degrees(caliTemp.y))<10)
 		{

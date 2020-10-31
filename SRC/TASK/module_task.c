@@ -53,22 +53,22 @@ portTASK_FUNCTION(vImuSensorReadTask, pvParameters)
 	
 	while(1)
 	{
-		//读取加速度传感器
-		AccDataUpdate(accRaw);
-		//读取陀螺仪传感器
-		GyroDataUpdate(gyroRaw);
-		//读取IMU温度传感器
-		IMUTempUpdate(tempRaw);
-		
-		ACCRAW = *accRaw;
-		GYRORAW = *gyroRaw;
-		TEMPRAW = *tempRaw;
-		
-		
+		//更新传感器原始数据
+		AccDataUpdate();
+		GyroDataUpdate();
+		IMUtempUpdate();
+		//读取传感器数据
+		AccDataRead(accRaw);
+		GyroDataRead(gyroRaw);
+		IMUtempRead(tempRaw);
 		//更新消息队列，通知数据预处理任务对IMU数据进行预处理
 		xQueueSendToBack(messageQueue[ACC_SENSOR_READ], (void *)&accRaw, 0);
 		xQueueSendToBack(messageQueue[GYRO_SENSOR_READ], (void *)&gyroRaw, 0);
 		xQueueSendToBack(messageQueue[TEMP_SENSOR_READ], (void *)&tempRaw, 0);
+		
+		ACCRAW = *accRaw;
+		GYRORAW = *gyroRaw;
+		TEMPRAW = *tempRaw;
 		
 		//阻塞1ms，对于当前系统就是一个时间片
 		vTaskDelayUntil(&xLastWakeTime, (1/portTICK_RATE_MS));
@@ -86,6 +86,10 @@ portTASK_FUNCTION(vOtherSensorReadTask, pvParameters)
 {
 	portTickType xLastWakeTime;
 	static uint16_t cnt = 0;
+	
+	Vector3f_t *magRaw = pvPortMalloc(sizeof(Vector3f_t));
+	float *baroPres = pvPortMalloc(sizeof(float));
+	float *baroTemp = pvPortMalloc(sizeof(float));
 	
 	//挂起调度器
 	vTaskSuspendAll();
@@ -108,6 +112,8 @@ portTASK_FUNCTION(vOtherSensorReadTask, pvParameters)
 			vTaskSuspendAll();
 			MagDataUpdate();
 			xTaskResumeAll();
+			MagDataRead(magRaw);
+			xQueueSendToBack(messageQueue[MAG_SENSOR_READ], (void *)&magRaw, 0);
 		}
 		
 		//气压传感器数据更新(50Hz)
@@ -117,6 +123,10 @@ portTASK_FUNCTION(vOtherSensorReadTask, pvParameters)
 			vTaskSuspendAll();
 			BaroDataUpdate();
 			xTaskResumeAll();
+			BaroPresRead(baroPres);
+			BaroTempRead(baroTemp);
+			xQueueSendToBack(messageQueue[BARO_PRES_READ], (void *)&baroPres, 0);
+			xQueueSendToBack(messageQueue[BARO_TEMP_READ], (void *)&baroTemp, 0);
 		}
 		
 		//飞控参数保存(参数有更新才会写入)20Hz
