@@ -9,19 +9,11 @@
 #include "drv_sbus.h"
 #include "mathTool.h"
 
+#include "flightStatus.h"
 
-//摇杆触发值，摇杆值范围为+-500，超过300属于处罚范围
-#define UN_YAW_VALUE 300
-#define UN_THR_VALUE 300
-#define UN_PIT_VALUE 300
-#define UN_ROL_VALUE 300
-
-
-static u16 cwd_cnt[10];
+static u16 cwd_cnt[8];
 u8 chn_en_bit = 0;
 s16 CH_N[CH_NUM] = {0,0,0,0};
-
-
 
 /**********************************************************************************************************
 *函 数 名: Remote_Control_Init
@@ -72,10 +64,25 @@ void RC_Duty_Task(u8 dT_ms)
 		{
 			//CH_N[]+1500为上位机显示通道值
 			CH_N[i] = 0.65f*((s16)Rc_Sbus_In[i]-1024);	//248 --1024 --1800，处理成大约+-500摇杆量
+			if(i==CH5)
+			{
+				if(CH_N[i]<-300)
+					SetFlightMode(MANUAL);
+				else if(CH_N[i]>-100 && CH_N[i]<100)
+					SetFlightMode(MISSION);
+				else if(CH_N[i]>300)
+					SetFlightMode(MISSION);
+			}
+			if(i==CH6 && CH_N[i]>100)
+			{
+				SetFlightMode(FAILSAFE);
+			}
+		
 		}
 		else
 		{
 			CH_N[i] = 0;
+			SetFlightMode(FAILSAFE);
 		}
 		CH_N[i] = LIMIT(CH_N[i], -500, 500);	//限制到+-500
 	}

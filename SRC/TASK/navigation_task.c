@@ -26,13 +26,20 @@ xTaskHandle flightStatusHandle;
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
+Vector3f_t gyroN, accN, magN;
+
 portTASK_FUNCTION(vNavigationTask, pvParameters)
 {
-	Vector3f_t* gyro;
-	Vector3f_t* acc;
 	portTickType xLastWakeTime;
+	static uint16_t cnt = 0;
+		
+	//消息队列传递的数据	
+	Vector3f_t *gyro;
+	Vector3f_t *acc;
+	Vector3f_t *mag;
+
 	
-	vTaskDelay(500);
+	//vTaskDelay(500);
 	
 	//挂起调度器
 	vTaskSuspendAll();
@@ -49,20 +56,28 @@ portTASK_FUNCTION(vNavigationTask, pvParameters)
 	xLastWakeTime = xTaskGetTickCount();
 	while(1)
 	{
+		cnt++;
 		//从消息队列中获取数据
 		xQueueReceive(messageQueue[GYRO_PRETREAT], &gyro, (3/portTICK_RATE_MS));
 		xQueueReceive(messageQueue[ACC_PRETREAT], &acc, (3/portTICK_RATE_MS));
+		accN = *acc;
+		gyroN = *gyro;
+		if(cnt%10 == 0)
+		{
+			xQueueReceive(messageQueue[MAG_PRETREAT], &mag, 0);
+			magN = *mag;
+		}
 		
 		//姿态解算更新
 		//Vector3f_t vecTmp; vecTmp.x=0.0f; vecTmp.y=0.0f; vecTmp.z=0.0f;
-		MahonyAHRSupdate(*gyro, *acc, MagGetData());
+		MahonyAHRSupdate(*gyro, *acc, magN);		//使用magN防止内存错误访问
 
 //		dcmat = GetDCM();
 //		eulers = GetEuler();
 		
 		//AnoAHRSupdate(*gyro, *acc, MagGetData());
 		
-		//阻塞2ms
+		//阻塞1ms
 		vTaskDelayUntil(&xLastWakeTime, (1/portTICK_RATE_MS));
 	}
 	

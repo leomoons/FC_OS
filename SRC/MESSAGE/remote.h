@@ -23,6 +23,7 @@ enum
 	CH_NUM
 };
 
+extern s16 CH_N[CH_NUM];
 
 void Remote_Control_Init(void);
 void RC_Duty_Task(u8 dT_ms);
