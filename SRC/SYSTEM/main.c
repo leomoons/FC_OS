@@ -31,7 +31,7 @@ portTASK_FUNCTION(vStartTask, pvParameters)
 {
 	//外设驱动初始化
  	BoardInit();
-	configASSERT(1+1);
+
 	//参数初始化
 	ParamInit();
 	//消息队列创建

@@ -35,7 +35,7 @@ enum
 **********************************************************************************************************/
 #define GYRO_ROTATION       ROTATION_YAW_270
 #define ACC_ROTATION        ROTATION_YAW_90
-#define MAG_ROTATION        ROTATION_NONE
+#define MAG_ROTATION        ROTATION_ROLL_180
 
 /**********************************************************************************************************
 *传感器配置

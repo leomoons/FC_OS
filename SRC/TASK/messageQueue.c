@@ -30,9 +30,18 @@ void MessageQueueCreate(void)
 	messageQueue[ACC_SENSOR_READ] = xQueueCreate(2, sizeof(Vector3f_t *));
 	messageQueue[TEMP_SENSOR_READ] = xQueueCreate(2, sizeof(float *));
 	
+	//磁罗盘原始数据队列
+	messageQueue[MAG_SENSOR_READ] = xQueueCreate(2, sizeof(Vector3f_t *));
+	
+	//气压计原始数据队列
+	messageQueue[BARO_PRES_READ] = xQueueCreate(2, sizeof(float *));
+	messageQueue[BARO_TEMP_READ] = xQueueCreate(2, sizeof(float *));
+	
+	
 	messageQueue[GYRO_PRETREAT] = xQueueCreate(2, sizeof(Vector3f_t *));
 	messageQueue[ACC_PRETREAT] = xQueueCreate(2, sizeof(Vector3f_t *));
 	messageQueue[GYRO_LPF] = xQueueCreate(2, sizeof(Vector3f_t *));
+	messageQueue[MAG_PRETREAT] = xQueueCreate(1, sizeof(Vector3f_t *));
 }
 
 

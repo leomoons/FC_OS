@@ -23,12 +23,19 @@ enum
 	MagCaliVertical,		//磁罗盘校准中的竖直旋转
 };
 
-
+//飞行模式
+enum
+{
+	MANUAL = 0,			//手动
+	MISSION,			//按设定轨迹飞行
+	FAILSAFE			//紧急停止
+};
 
 typedef struct
 {
 	uint8_t placement;		//放置状态
 	uint8_t caliSt;			//传感器所处校准状态
+	uint8_t mode;			//飞行模式
 }FLIGHT_STATUS_t;
 
 extern FLIGHT_STATUS_t flyStatus;
@@ -39,6 +46,7 @@ uint8_t GetPlaceStatus(void);
 void SetCaliStatus(uint8_t status);
 uint8_t GetCaliStatus(void);
 
+void SetFlightMode(uint8_t mode);
+uint8_t GetFlightMode(void);
 
 #endif
-
