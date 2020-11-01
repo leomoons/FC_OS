@@ -1,5 +1,5 @@
 #ifndef __ANOAHRS_H
-#define __AHOAHRS_H
+#define __ANOAHRS_H
 
 #include "mathConfig.h"
 
@@ -21,11 +21,11 @@ typedef struct{
 	Vector3f_t obs_acc_b;
 	Vector3f_t gra_acc;
 	
-	Vector3f_t eulerAngle;
+	Vector3f_t euler;
 	float dcMat[9];
 	
 	
-}_imu_data_st;
+}ANO_ahrs_t;
 
 typedef struct{
 	float akp;
@@ -40,12 +40,12 @@ typedef struct{
 	u8 M_fix_en;
 	
 	u8 obs_en;			//是否使能机体坐标系下的状态量观测（observe）
-}_imu_state_st;
+}ANO_state_st;
 
 void AnoAHRSinit(void);
 void AnoAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag);
 
-float* AnoGetDCM(void);
-
+void AnoGetDCM(float *dcm);
+void AnoGetEuler(Vector3f_t *euler);
 
 #endif

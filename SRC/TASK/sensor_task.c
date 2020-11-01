@@ -25,8 +25,8 @@ xTaskHandle otherSensorPretreatHandle;
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
-Vector3f_t ACCPRE, GYROPRE, GYROLPF;
-
+Vector3f_t accS, gyroS, gyroLPF;
+Vector3f_t accR, gyroR;
 portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 {
 	portTickType xLastWakeTime;
@@ -60,7 +60,8 @@ portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 		xQueueReceive(messageQueue[GYRO_SENSOR_READ], &gyroRaw, (3/portTICK_RATE_MS));
 		xQueueReceive(messageQueue[ACC_SENSOR_READ], &accRaw, (3/portTICK_RATE_MS));
 		xQueueReceive(messageQueue[TEMP_SENSOR_READ], &tempRaw, (3/portTICK_RATE_MS));
-		
+		accR = *accRaw;
+		gyroR = *gyroRaw;
 		
 		//陀螺仪校准
 		GyroCalibration(*gyroRaw);
@@ -74,9 +75,9 @@ portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 		//陀螺仪数据预处理
 		GyroDataPreTreat(*gyroRaw, *tempRaw, gyroPre, gyroLpf);
 		
-		ACCPRE = *accPre;
-		GYROPRE = *gyroPre;
-		GYROLPF = *gyroLpf;
+		accS = *accPre;
+		gyroS = *gyroPre;
+		gyroLPF = *gyroLpf;
 		
 		//往下一级消息队列中填充数据
 		xQueueSendToBack(messageQueue[ACC_PRETREAT], (void*)&accPre, 0);
@@ -96,7 +97,7 @@ portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
-Vector3f_t MAGRAW2;
+Vector3f_t magR, magS;
 portTASK_FUNCTION(vOtherPretreatTask, pvParameters)
 {
 	portTickType xLastWakeTime;
@@ -128,14 +129,14 @@ portTASK_FUNCTION(vOtherPretreatTask, pvParameters)
 		{
 			xQueueReceive(messageQueue[MAG_SENSOR_READ], &magRaw, (3/portTICK_RATE_MS));
 			xQueuePeek(messageQueue[GYRO_LPF], &gyroLpf, (3/portTICK_RATE_MS));
-			MAGRAW2 = *magRaw;
+			magR = *magRaw;
 		
 			//磁力计校准
 			MagCalibration(*magRaw, *gyroLpf);
 			
 			//磁力计数据预处理
 			MagDataPreTreat(*magRaw, magPre);
-			
+			magS = *magPre;
 			xQueueSendToBack(messageQueue[MAG_PRETREAT], (void *)&magPre, (3/portTICK_RATE_MS));
 		}
 		

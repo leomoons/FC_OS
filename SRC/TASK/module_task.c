@@ -30,8 +30,6 @@ xTaskHandle otherSensorReadHandle;
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
-Vector3f_t ACCRAW, GYRORAW;
-float TEMPRAW;
 portTASK_FUNCTION(vImuSensorReadTask, pvParameters)
 {
 	portTickType xLastWakeTime;
@@ -65,10 +63,7 @@ portTASK_FUNCTION(vImuSensorReadTask, pvParameters)
 		xQueueSendToBack(messageQueue[ACC_SENSOR_READ], (void *)&accRaw, 0);
 		xQueueSendToBack(messageQueue[GYRO_SENSOR_READ], (void *)&gyroRaw, 0);
 		xQueueSendToBack(messageQueue[TEMP_SENSOR_READ], (void *)&tempRaw, 0);
-		
-		ACCRAW = *accRaw;
-		GYRORAW = *gyroRaw;
-		TEMPRAW = *tempRaw;
+
 		
 		//阻塞1ms，对于当前系统就是一个时间片
 		vTaskDelayUntil(&xLastWakeTime, (1/portTICK_RATE_MS));

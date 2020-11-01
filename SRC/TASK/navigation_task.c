@@ -12,23 +12,24 @@
 #include "flightStatus.h"
 #include "gyroscope.h"
 
-#include "anoAHRS.h"
-#include "mahonyAHRS.h"
+#include "ahrs.h"
 #include "messageQueue.h"
 #include "magnetometer.h"
 
-xTaskHandle navigationHandle;
+xTaskHandle ahrsHandle;
 xTaskHandle flightStatusHandle;
 
 /**********************************************************************************************************
-*函 数 名: vNavigationTask
+*函 数 名: vAhrsTask
 *功能说明: 导航计算相关任务
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
 Vector3f_t gyroN, accN, magN;
+float dcmat;
+Vector3f_t eulers;
 
-portTASK_FUNCTION(vNavigationTask, pvParameters)
+portTASK_FUNCTION(vAhrsTask, pvParameters)
 {
 	portTickType xLastWakeTime;
 	static uint16_t cnt = 0;
@@ -45,13 +46,12 @@ portTASK_FUNCTION(vNavigationTask, pvParameters)
 	vTaskSuspendAll();
 	
 	//姿态估计参数初始化
-	MahonyAHRSinit();
-	//AnoAHRSinit();
+	AHRSinit();
+
 	//唤醒调度器
 	xTaskResumeAll();
 	
-//	float *dcmat;
-//	Vector3f_t eulers;
+	
 	
 	xLastWakeTime = xTaskGetTickCount();
 	while(1)
@@ -70,12 +70,10 @@ portTASK_FUNCTION(vNavigationTask, pvParameters)
 		
 		//姿态解算更新
 		//Vector3f_t vecTmp; vecTmp.x=0.0f; vecTmp.y=0.0f; vecTmp.z=0.0f;
-		MahonyAHRSupdate(*gyro, *acc, magN);		//使用magN防止内存错误访问
+		AHRSupdate(gyro, acc, &magN);		//使用magN防止内存错误访问
 
-//		dcmat = GetDCM();
-//		eulers = GetEuler();
-		
-		//AnoAHRSupdate(*gyro, *acc, MagGetData());
+		GetDCM(&dcmat);
+		GetEuler(&eulers);
 		
 		//阻塞1ms
 		vTaskDelayUntil(&xLastWakeTime, (1/portTICK_RATE_MS));
@@ -117,7 +115,7 @@ portTASK_FUNCTION(vFlightStatusTask, pvParameters)
 **********************************************************************************************************/
 void NavigationTaskCreate(void)
 {
-    xTaskCreate(vNavigationTask, "navigation", NAVIGATION_TASK_STACK, NULL, NAVIGATION_TASK_PRIORITY, &navigationHandle);
+    xTaskCreate(vAhrsTask, "ahrs", AHRS_TASK_STACK, NULL, AHRS_TASK_PRIORITY, &ahrsHandle);
     xTaskCreate(vFlightStatusTask, "flightStatus", FLIGHT_STATUS_TASK_STACK, NULL, FLIGHT_STATUS_TASK_PRIORITY, &flightStatusHandle);
 }
 

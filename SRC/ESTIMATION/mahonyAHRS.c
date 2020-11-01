@@ -6,16 +6,15 @@
  * @日期     2020.10
 **********************************************************************************************************/
 #include "mahonyAHRS.h"
-#include "ahrsConfig.h"
 #include "boardConfig.h"
-
+#include "ahrs.h"
 
 #define twoKpDef	(2.0f * 0.5f)	// 2 * proportional gain
 #define twoKiDef	(2.0f * 0.0f)	// 2 * integral gain
 
 volatile float twoKp;											// 2 * proportional gain (Kp)
 volatile float twoKi;											// 2 * integral gain (Ki)					// quaternion of sensor frame relative to auxiliary frame
-volatile float integralFBx,  integralFBy, integralFBz;	// integral error terms scaled by Ki
+volatile float integralFBx,  integralFBy, integralFBz;			// integral error terms scaled by Ki
 
 AHRS_t ahrs;
 
@@ -57,8 +56,8 @@ void MahonyAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 	float qa, qb, qc;
 	
 	static uint64_t previousT = 0.0f;
-	float deltaT = (GetSysTimeUs() - previousT) * 1e-6;
-	deltaT = ConstrainFloat(deltaT, 5e-4, 2e-3);
+	float dT_s = (GetSysTimeUs() - previousT) * 1e-6;
+	dT_s = ConstrainFloat(dT_s, 5e-4, 2e-3);
 	previousT = GetSysTimeUs();
 	
 	//Use IMU algorithm if magnetometer mesaurement invvalid (avoids NaN in magnetometer normalisation)
@@ -113,16 +112,14 @@ void MahonyAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 		//Error is sum of cross product between estimated direction and measured direction of field vectors
 		halfex = (acc.y * halfvz - acc.z * halfvy) + (mag.y * halfwz - mag.z * halfwy);
 		halfey = (acc.z * halfvx - acc.x * halfvz) + (mag.z * halfwx - mag.x * halfwz);
-//		halfex = (acc.y * halfvz + acc.z * halfvy);
-//		halfey =(-acc.z * halfvx - acc.x * halfvz);
 		halfez = (acc.x * halfvy - acc.y * halfvx) + (mag.x * halfwy - mag.y * halfwx);
 		
 		//Compute and apply integral feedback if enabled
 		if(twoKi > 0.0f)
 		{
-			integralFBx += twoKi * halfex * deltaT;	// integral error scaled by Ki
-			integralFBy += twoKi * halfey * deltaT;
-			integralFBz += twoKi * halfez * deltaT;
+			integralFBx += twoKi * halfex * dT_s;	// integral error scaled by Ki
+			integralFBy += twoKi * halfey * dT_s;
+			integralFBz += twoKi * halfez * dT_s;
 			gyro.x += integralFBx;	// apply integral feedback
 			gyro.y += integralFBy;
 			gyro.z += integralFBz;
@@ -141,9 +138,9 @@ void MahonyAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 	}
 	
 	// Integrate rate of change of quaternion
-	gyro.x *= (0.5f * deltaT);		// pre-multiply common factors
-	gyro.y *= (0.5f * deltaT);
-	gyro.z *= (0.5f * deltaT);
+	gyro.x *= (0.5f * dT_s);		// pre-multiply common factors
+	gyro.y *= (0.5f * dT_s);
+	gyro.z *= (0.5f * dT_s);
 	qa = ahrs.quat[0];
 	qb = ahrs.quat[1];
 	qc = ahrs.quat[2];
@@ -174,18 +171,19 @@ void MahonyAHRSupdateIMU(Vector3f_t gyro, Vector3f_t acc)
 	float qa, qb, qc;
 	
 	static uint64_t previousT;
-	float deltaT = (GetSysTimeUs() - previousT) * 1e-6;
-	deltaT = ConstrainFloat(deltaT, 5e-4, 2e-3);
+	float dT_s = (GetSysTimeUs() - previousT) * 1e-6;
+	dT_s = ConstrainFloat(dT_s, 5e-4, 2e-3);
 	previousT = GetSysTimeUs();
 
 	// Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
-	if(!((acc.x == 0.0f) && (acc.y == 0.0f) && (acc.z == 0.0f))) {
+	if(!((acc.x == 0.0f) && (acc.y == 0.0f) && (acc.z == 0.0f)))
+	{
 
 		// Normalise accelerometer measurement
-//		norm = Pythagorous3(acc.x, acc.y, acc.z);
-//		acc.x /= norm;
-//		acc.y /= norm;
-//		acc.z /= norm;        
+		norm = Pythagorous3(acc.x, acc.y, acc.z);
+		acc.x /= norm;
+		acc.y /= norm;
+		acc.z /= norm;        
 
 		// Estimated direction of gravity and vector perpendicular to magnetic flux
 		halfvx = ahrs.quat[1] * ahrs.quat[3] - ahrs.quat[0] * ahrs.quat[2];
@@ -199,9 +197,9 @@ void MahonyAHRSupdateIMU(Vector3f_t gyro, Vector3f_t acc)
 
 		// Compute and apply integral feedback if enabled
 		if(twoKi > 0.0f) {
-			integralFBx += twoKi * halfex * deltaT;	// integral error scaled by Ki
-			integralFBy += twoKi * halfey * deltaT;
-			integralFBz += twoKi * halfez * deltaT;
+			integralFBx += twoKi * halfex * dT_s;	// integral error scaled by Ki
+			integralFBy += twoKi * halfey * dT_s;
+			integralFBz += twoKi * halfez * dT_s;
 			gyro.x += integralFBx;	// apply integral feedback
 			gyro.y += integralFBy;
 			gyro.z += integralFBz;
@@ -219,9 +217,9 @@ void MahonyAHRSupdateIMU(Vector3f_t gyro, Vector3f_t acc)
 	}
 	
 	// Integrate rate of change of quaternion
-	gyro.x *= (0.5f * deltaT);		// pre-multiply common factors
-	gyro.y *= (0.5f * deltaT);
-	gyro.z *= (0.5f * deltaT);
+	gyro.x *= (0.5f * dT_s);		// pre-multiply common factors
+	gyro.y *= (0.5f * dT_s);
+	gyro.z *= (0.5f * dT_s);
 	qa = ahrs.quat[0];
 	qb = ahrs.quat[1];
 	qc = ahrs.quat[2];
@@ -240,30 +238,30 @@ void MahonyAHRSupdateIMU(Vector3f_t gyro, Vector3f_t acc)
 
 
 /**********************************************************************************************************
-*函 数 名: GetDCM
+*函 数 名: MahonyGetDCM
 *功能说明: 获取方向余弦矩阵
 *形    参: 旋转矩阵数组头
 *返 回 值: 无
 **********************************************************************************************************/
-void GetDCM(float* dcm)
+void MahonyGetDCM(float* dcm)
 {
 	
-	Quater_to_DCM(ahrs._dcm, ahrs.quat);
+	Quater_to_DCM(ahrs.dcm, ahrs.quat);
 	
-	Matrix3_Copy(ahrs._dcm, dcm);
+	Matrix3_Copy(ahrs.dcm, dcm);
 }
 
 
 /**********************************************************************************************************
-*函 数 名: GetEuler
+*函 数 名: MahonyGetEuler
 *功能说明: 获取欧拉角
 *形    参: 无
 *返 回 值: ZYX旋转顺序欧拉角(rad)
 **********************************************************************************************************/
-Vector3f_t GetEuler(void)
+void MahonyGetEuler(Vector3f_t *euler)
 {
 	ahrs.euler = Quater_to_Euler(ahrs.quat);
 	
-	return ahrs.euler;
+	*euler = ahrs.euler;
 }
 

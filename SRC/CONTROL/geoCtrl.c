@@ -11,7 +11,7 @@
 #include "mathConfig.h"
 #include "controller.h"
 
-#include "mahonyAHRS.h"
+#include "ahrs.h"
 #include "setPoint.h"
 #include "optitrack.h"
 #define MAX_POS_DES	2	//手动飞行中摇杆所能对应的最大位置误差（单位：m）

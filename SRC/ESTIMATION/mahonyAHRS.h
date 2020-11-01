@@ -6,7 +6,7 @@ void MahonyAHRSinit(void);
 void MahonyAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag);
 void MahonyAHRSupdateIMU(Vector3f_t gyro, Vector3f_t acc);
 
-void GetDCM(float* dcm);
-Vector3f_t GetEuler(void);
+void MahonyGetDCM(float* dcm);
+void MahonyGetEuler(Vector3f_t *euler);
 
 #endif
