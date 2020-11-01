@@ -96,6 +96,7 @@ portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
+Vector3f_t MAGRAW2;
 portTASK_FUNCTION(vOtherPretreatTask, pvParameters)
 {
 	portTickType xLastWakeTime;
@@ -127,6 +128,8 @@ portTASK_FUNCTION(vOtherPretreatTask, pvParameters)
 		{
 			xQueueReceive(messageQueue[MAG_SENSOR_READ], &magRaw, (3/portTICK_RATE_MS));
 			xQueuePeek(messageQueue[GYRO_LPF], &gyroLpf, (3/portTICK_RATE_MS));
+			MAGRAW2 = *magRaw;
+		
 			//磁力计校准
 			MagCalibration(*magRaw, *gyroLpf);
 			

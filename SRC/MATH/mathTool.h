@@ -18,6 +18,7 @@
 #define abs(x) ((x) > 0 ? (x) : -(x))
 #define sign(x) ( ((x) > 1e-6f) ? 1:( ((x)<-1e-6f) ? -1 : 0) )
 #define LIMIT( x,min,max ) ( ((x) <= (min)) ? (min) : ( ((x) > (max))? (max) : (x) ) )
+#define safe_div(numerator,denominator,safe_value) ( (denominator == 0)? (safe_value) : ((numerator)/(denominator)) )
 
 float SafeArcsin(float v);
 float fast_atan2(float y, float x);

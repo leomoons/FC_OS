@@ -35,42 +35,42 @@ void ImuOrientationDetect(void)
 			fabsf(acc.y) < accel_err_thr &&
 			fabsf(acc.z) < accel_err_thr)
 	{
-		orientationStatus = ORIENTATION_FRONT;
+		orientationStatus = ORIENTATION_BACK;
 	}
 	// [ -g, 0, 0 ]
     if (fabsf(acc.x + CONSTANTS_ONE_G) < accel_err_thr &&
             fabsf(acc.y) < accel_err_thr &&
             fabsf(acc.z) < accel_err_thr)
     {
-        orientationStatus = ORIENTATION_BACK;
+        orientationStatus = ORIENTATION_FRONT;
     }
     // [ 0, g, 0 ]
     if (fabsf(acc.x) < accel_err_thr &&
             fabsf(acc.y - CONSTANTS_ONE_G) < accel_err_thr &&
             fabsf(acc.z) < accel_err_thr)
     {
-        orientationStatus = ORIENTATION_LEFT;
+        orientationStatus = ORIENTATION_RIGHT;
     }
     // [ 0, -g, 0 ]
     if (fabsf(acc.x) < accel_err_thr &&
             fabsf(acc.y + CONSTANTS_ONE_G) < accel_err_thr &&
             fabsf(acc.z) < accel_err_thr)
     {
-        orientationStatus = ORIENTATION_RIGHT;
+        orientationStatus = ORIENTATION_LEFT;
     }
     // [ 0, 0, g ]
     if (fabsf(acc.x) < accel_err_thr &&
             fabsf(acc.y) < accel_err_thr &&
             fabsf(acc.z - CONSTANTS_ONE_G) < accel_err_thr)
     {
-        orientationStatus = ORIENTATION_UP;
+        orientationStatus = ORIENTATION_DOWN;
     }
     // [ 0, 0, -g ]
     if (fabsf(acc.x) < accel_err_thr &&
             fabsf(acc.y) < accel_err_thr &&
             fabsf(acc.z + CONSTANTS_ONE_G) < accel_err_thr)
     {
-        orientationStatus = ORIENTATION_DOWN;
+        orientationStatus = ORIENTATION_UP;
     }
 }
 

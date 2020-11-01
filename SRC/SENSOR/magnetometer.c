@@ -16,6 +16,7 @@
 #include "flightStatus.h"
 #include "module.h"
 
+//#define MAGCALI_LM 
 
 enum
 {
@@ -90,11 +91,12 @@ void MagDataPreTreat(Vector3f_t magRaw, Vector3f_t* magPre)
 }
 
 /**********************************************************************************************************
-*函 数 名: MagCalibration
+*函 数 名: MagCalibration（可选择LM取最优校准参数法 或 匿名飞控校准法）
 *功能说明: 磁力计校准
 *形    参: 磁力计原始数据
 *返 回 值: 无
 **********************************************************************************************************/
+#ifdef MAGCALI_LM
 void MagCalibration(Vector3f_t magRaw, Vector3f_t gyroLpf)
 {
 	static Vector3f_t samples[6];
@@ -111,8 +113,6 @@ void MagCalibration(Vector3f_t magRaw, Vector3f_t gyroLpf)
 	
 	if(_mag.cali.should_cali)
 	{
-
-		
 		//校准分两个阶段：1.水平旋转 2.机头朝上或朝下然后水平旋转
 		//两个阶段分别对飞机的z轴和x轴陀螺仪数据进行积分，记录旋转过的角度
 		if(_mag.cali.step == 1)
@@ -148,7 +148,7 @@ void MagCalibration(Vector3f_t magRaw, Vector3f_t gyroLpf)
 		else
 		{
 			//实时计算磁场强度模值
-			earthMag = earthMag * 0.998f + Pythagorous3(magRaw.x, magRaw.y, magRaw.z);
+			earthMag = earthMag * 0.998f + Pythagorous3(magRaw.x, magRaw.y, magRaw.z)*0.002f;
 			
 			//找到每个轴的最大最小值，并对采样值进行一阶低通滤波
 			if(Pythagorous3(magRaw.x, magRaw.y, magRaw.z) < earthMag*1.5f)
@@ -281,6 +281,98 @@ void MagCalibration(Vector3f_t magRaw, Vector3f_t gyroLpf)
 		}
 	}
 }
+#else
+Vector3f_t magMax;
+Vector3f_t magMin;
+void MagCalibration(Vector3f_t magRaw, Vector3f_t gyroLpf)
+{
+	static float mag_cali_angle = 0.0f;
+	
+	//计算时间间隔，用于积分
+	static uint64_t previousT;
+	float dT_s = (GetSysTimeUs() - previousT) * 1e-6f;
+	previousT = GetSysTimeUs();
+	
+	
+	if(_mag.cali.should_cali)
+	{
+		switch(_mag.cali.step)
+		{
+			case 0:		//第一步，水平旋转
+				magMax.x = max(magMax.x, magRaw.x);
+				magMax.y = max(magMax.y, magRaw.y);
+				magMin.x = min(magMin.x, magRaw.x);
+				magMin.y = min(magMin.y, magRaw.y);
+			
+				if(GetImuOrientation() != ORIENTATION_UP)		//校准过程中不够水平，则累计数据清零
+				{
+					mag_cali_angle = 0.0;
+					magMax.x = magMax.y = magMin.x = magMin.y = 0.0f;
+				}
+				else
+				{
+					mag_cali_angle += dT_s * gyroLpf.z;	//角度积分
+					if(abs(mag_cali_angle) > 2*M_PI)
+					{
+						_mag.cali.step = 1;
+						mag_cali_angle = 0.0f;
+						
+						SetCaliStatus(MagCaliVertical);
+					}
+				}
+			break;
+			case 1:		//第二步，竖直旋转,机头朝上
+				magMax.z = max(magMax.z, magRaw.z);
+				magMin.z = min(magMin.z, magRaw.z);
+			
+				if(GetImuOrientation() != ORIENTATION_FRONT)	//校准过程中不够竖直，则数据清零
+				{
+					mag_cali_angle = 0.0f;
+					magMax.z = magMin.z = 0.0f;
+				}
+				else
+				{
+					mag_cali_angle += dT_s * gyroLpf.x;	//角度积分
+					if(abs(mag_cali_angle) > 2*M_PI)
+					{
+						_mag.cali.step = 2;
+						mag_cali_angle = 0.0f;
+						
+						SetCaliStatus(NoCali);
+					}
+				}
+			break;
+				
+			case 2:		//第三步，根据数据计算校准参数并保存
+				_mag.cali.offset.x = 0.5f * (magMax.x + magMin.x);
+				_mag.cali.offset.y = 0.5f * (magMax.y + magMin.y);
+				_mag.cali.offset.z = 0.5f * (magMax.z + magMin.z);
+				_mag.cali.scale.x = safe_div(60, (0.5f*(magMax.x-magMin.x)), 0);
+				_mag.cali.scale.y = safe_div(60, (0.5f*(magMax.y-magMin.y)), 0);
+				_mag.cali.scale.z = safe_div(60, (0.5f*(magMax.z-magMin.z)), 0);
+			
+				//保存校准参数
+                ParamUpdateData(PARAM_MAG_OFFSET_X, &_mag.cali.offset.x);
+                ParamUpdateData(PARAM_MAG_OFFSET_Y, &_mag.cali.offset.y);
+                ParamUpdateData(PARAM_MAG_OFFSET_Z, &_mag.cali.offset.z);
+                ParamUpdateData(PARAM_MAG_SCALE_X, &_mag.cali.scale.x);
+                ParamUpdateData(PARAM_MAG_SCALE_Y, &_mag.cali.scale.y);
+                ParamUpdateData(PARAM_MAG_SCALE_Z, &_mag.cali.scale.z);
+                //ParamUpdateData(PARAM_MAG_EARTH_MAG, &_mag.earthMag);
+			
+				_mag.cali.step = 0;
+				_mag.cali.should_cali = 0;
+			
+				printf("Magnetometer calibrated completed.");
+				
+			break;
+		}
+	}
+	
+}
+#endif
+
+
 
 /**********************************************************************************************************
 *函 数 名: MagGetData
