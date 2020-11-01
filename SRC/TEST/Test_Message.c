@@ -7,7 +7,7 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
-
+#include "ANOmessage.h"
 
 xTaskHandle messageHandler;
 
@@ -20,18 +20,25 @@ xTaskHandle messageHandler;
 portTASK_FUNCTION(vMessageTest, pvParameters)
 {
 	
+	uint32_t i=0;
+	
 	while(1)
 	{
 		//teat1: usart2
-		printf("printf function test\r\n");
+		//printf("printf function test\r\n");
 	
 		//test2: message(usart2&usart3)
-		MessageSendString("you dian sao\r");
+		//MessageSendString("you dian sao\r");
 	
-		//test4: LYHDecode
+		//test3: LYHDecode
 		LYH_Receive_Loop();
 		
-		OsDelayTick(1000);
+		//test4: send message to ano ground station
+		ANO_Send_Status(i%20, i%30, i%20, 10.0, 0,0);
+		i++;
+		
+		
+		OsDelayTick(50);
 	}
 }
 

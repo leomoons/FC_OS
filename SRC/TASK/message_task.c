@@ -10,6 +10,7 @@
 
 #include "LYHdecode.h"
 #include "remote.h"
+#include "message.h"
 xTaskHandle messageHandle;
 
 /**********************************************************************************************************
@@ -29,7 +30,7 @@ portTASK_FUNCTION(vMessageTask, pvParameters)
     for(;;)
     {
 		//发送飞控数据
-		//MessageSendLoop();
+		MessageSendLoop();
 		
 		//解码接收信息
 		LYH_Receive_Loop();

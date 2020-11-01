@@ -8,6 +8,8 @@
 #include "ANOmessage.h"
 #include "drv_usart.h"
 #include "boardConfig.h"
+#include "ahrs.h"
+#include "mathConfig.h"
 
 /*数据拆分宏定义，在发送大于1字节的数据类型时，比如int16、float等，
   需要把数据拆分成单独字节进行发送*/
@@ -47,6 +49,7 @@ static void ANO_Send_Data(u8 length)
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
+Vector3f_t euler;
 void ANO_Send_Loop(void)
 {
 	static u16 cnt = 0;
@@ -57,6 +60,7 @@ void ANO_Send_Loop(void)
 	const u16 power_cnt		= 50;
 	const u16 motopwm_cnt	= 20;
 	
+	cnt++;
 	/*信息发送flag经过固定时间后置1*/
 	if((cnt%status_cnt) == (status_cnt-1))
 		ano_flag.send_status = 1;
@@ -80,7 +84,11 @@ void ANO_Send_Loop(void)
 	else if(ano_flag.send_sensor)
 	{
 		ano_flag.send_sensor = 0;
-		
+		GetEuler(&euler);
+		float x = euler.x * RAD_TO_DEG;
+		float y = euler.y * RAD_TO_DEG;
+		float z = euler.z * RAD_TO_DEG;
+		ANO_Send_Status(x, y, z, 0, 1, 1);
 	}
 	else if(ano_flag.send_sensor2)
 	{
