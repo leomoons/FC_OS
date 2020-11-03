@@ -32,7 +32,7 @@ Vector3f_t eulers;
 portTASK_FUNCTION(vAhrsTask, pvParameters)
 {
 	portTickType xLastWakeTime;
-	static uint16_t cnt = 0;
+	uint32_t cnt = 0;
 		
 	//消息队列传递的数据	
 	Vector3f_t *gyro;
@@ -57,6 +57,7 @@ portTASK_FUNCTION(vAhrsTask, pvParameters)
 	while(1)
 	{
 		cnt++;
+		cnt %= 20;
 		//从消息队列中获取数据
 		xQueueReceive(messageQueue[GYRO_PRETREAT], &gyro, (3/portTICK_RATE_MS));
 		xQueueReceive(messageQueue[ACC_PRETREAT], &acc, (3/portTICK_RATE_MS));
