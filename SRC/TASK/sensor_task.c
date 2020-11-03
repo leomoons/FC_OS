@@ -64,16 +64,19 @@ portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 		gyroR = *gyroRaw;
 		
 		//陀螺仪校准
-		GyroCalibration(*gyroRaw);
+		GyroCalibration(gyroRaw);
 		//加速度校准
-		AccCalibration(*accRaw);
+		AccCalibration(accRaw);
 		//IMU安装误差校准
-		ImuLevelCalibration();
+		//ImuLevelCalibration();
+		//加速度Z方向校准
+		AccZaxisCalibration(accRaw);
 		
+
 		//加速度数据预处理
-		AccDataPreTreat(*accRaw, accPre);
+		AccDataPreTreat(accRaw, accPre);
 		//陀螺仪数据预处理
-		GyroDataPreTreat(*gyroRaw, *tempRaw, gyroPre, gyroLpf);
+		GyroDataPreTreat(gyroRaw, *tempRaw, gyroPre, gyroLpf);
 		
 		accS = *accPre;
 		gyroS = *gyroPre;
@@ -81,7 +84,7 @@ portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 		
 		//往下一级消息队列中填充数据
 		xQueueSendToBack(messageQueue[ACC_PRETREAT], (void*)&accPre, 0);
-		xQueueSendToBack(messageQueue[GYRO_PRETREAT], (void*)&gyroPre, 0);
+		xQueueSendToBack(messageQueue[GYRO_PRETREAT], (void*)&gyroLpf, 0);
 		xQueueSendToBack(messageQueue[GYRO_LPF], (void*)&gyroLpf, 0);
 		
 		//阻塞1ms
@@ -101,7 +104,7 @@ Vector3f_t magR, magS;
 portTASK_FUNCTION(vOtherPretreatTask, pvParameters)
 {
 	portTickType xLastWakeTime;
-	static uint16_t cnt = 0;
+	uint32_t cnt = 0;
 	
 	//消息队列传递的数据
 	Vector3f_t *magRaw;
@@ -124,24 +127,25 @@ portTASK_FUNCTION(vOtherPretreatTask, pvParameters)
 	while(1)
 	{
 		cnt++;
-		//100Hz
+		cnt %= 20;
+		//50Hz
 		if(cnt%2 == 0)
 		{
 			xQueueReceive(messageQueue[MAG_SENSOR_READ], &magRaw, (3/portTICK_RATE_MS));
-			xQueuePeek(messageQueue[GYRO_LPF], &gyroLpf, (3/portTICK_RATE_MS));
+			xQueueReceive(messageQueue[GYRO_LPF], &gyroLpf, (3/portTICK_RATE_MS));
 			magR = *magRaw;
 		
 			//磁力计校准
-			MagCalibration(*magRaw, *gyroLpf);
+			MagCalibration(magRaw, gyroLpf);
 			
 			//磁力计数据预处理
-			MagDataPreTreat(*magRaw, magPre);
+			MagDataPreTreat(magRaw, magPre);
 			magS = *magPre;
 			xQueueSendToBack(messageQueue[MAG_PRETREAT], (void *)&magPre, (3/portTICK_RATE_MS));
 		}
-		
-		//25Hz
-		if(cnt%8 == 0)
+
+		//50Hz
+		if(cnt%2 == 0)
 		{
 			xQueueReceive(messageQueue[BARO_PRES_READ], &baroPresRaw, (3/portTICK_RATE_MS));
 			xQueueReceive(messageQueue[BARO_TEMP_READ], &baroTempRaw, (3/portTICK_RATE_MS));
@@ -150,7 +154,7 @@ portTASK_FUNCTION(vOtherPretreatTask, pvParameters)
 		}
 		
 		//睡眠5ms
-		vTaskDelayUntil(&xLastWakeTime, (5/portTICK_RATE_MS));
+		vTaskDelayUntil(&xLastWakeTime, (10/portTICK_RATE_MS));
 	}
 }
 

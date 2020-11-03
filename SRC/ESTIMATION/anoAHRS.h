@@ -4,16 +4,15 @@
 #include "mathConfig.h"
 
 typedef struct{
-	float w;	//q0
-	float x; 	//q1
-	float y;	//q2
-	float z;	//q3
+	float quat[4];
 	
 	Vector3f_t hori_vec;
 	
 	Vector3f_t acc_b;
 	Vector3f_t acc_w;
 	Vector3f_t acc_h;		//水平面上的加速度
+	
+	Vector3f_t gyro;
 	
 	Vector3f_t mag_w;		
 	
@@ -22,7 +21,7 @@ typedef struct{
 	Vector3f_t gra_acc;
 	
 	Vector3f_t euler;
-	float dcMat[9];
+	float dcm[9];
 	
 	
 }ANO_ahrs_t;

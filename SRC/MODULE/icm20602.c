@@ -109,7 +109,7 @@
 #define ICM20602_LPF_5HZ         6
 #define ICM20602_LPF_3281HZ      7
 
-//不同测量范围的最小有效位
+//不同测量范围的最小有效位(一共16位有效表示)
 #define MPU_A_2mg                ((float)0.00006103f)  //g/LSB
 #define MPU_A_4mg                ((float)0.00012207f)  //g/LSB
 #define MPU_A_8mg                ((float)0.00024414f)  //g/LSB
@@ -237,7 +237,7 @@ void ICM20602_Init(void)
 	ICM20602_SingleWrite(MPU_RA_GYRO_CONFIG, (3 << 3));
 	DelayXms(10);
 	
-	//加速度计自检及测量范围典型值0x18(不自检， 16G)
+	//加速度计自检及测量范围典型值0x18(不自检， +-16G)
 	ICM20602_SingleWrite(MPU_RA_ACCEL_CONFIG, (3 << 3));
 	DelayXms(10);
 	
@@ -336,7 +336,7 @@ void ICM20602_ReadAcc(Vector3f_t* acc)
 **********************************************************************************************************/
 void ICM20602_ReadGyro(Vector3f_t* gyro)
 {	
-	//转化为右手系，单位转化为dps(度每秒)
+	//转化为右手系，单位转化为rad/s
     gyro->x = (float)gyroRaw.x * MPU_G_s2000dps * DEG_TO_RAD;
     gyro->y = (float)gyroRaw.y * MPU_G_s2000dps * DEG_TO_RAD;
     gyro->z = (float)gyroRaw.z * MPU_G_s2000dps * DEG_TO_RAD;

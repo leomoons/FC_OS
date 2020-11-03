@@ -10,6 +10,7 @@
 
 #include "accelerometer.h"
 #include "gyroscope.h"
+#include "module.h"
 
 
 enum ORIENTATION_STATUS orientationStatus;
@@ -28,7 +29,7 @@ void ImuOrientationDetect(void)
 	Vector3f_t acc;
 	
 	//读取加速度数据
-	acc = AccGetData();
+	AccDataRead(&acc);
 	
 	// [ g, 0, 0 ]
 	if(fabsf(acc.x-CONSTANTS_ONE_G) < accel_err_thr &&

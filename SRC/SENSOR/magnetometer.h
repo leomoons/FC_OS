@@ -12,9 +12,9 @@ typedef struct {
 } MAGNETOMETER_t;
 
 void MagPreTreatInit(void);
-void MagDataPreTreat(Vector3f_t magRaw, Vector3f_t *magPre);
-void MagCalibration(Vector3f_t magRaw, Vector3f_t gyroPre);
-Vector3f_t MagGetData(void);
+void MagDataPreTreat(Vector3f_t *magRaw, Vector3f_t *magPre);
+void MagCalibration(Vector3f_t *magRaw, Vector3f_t *gyroPre);
+void MagGetData(Vector3f_t *mag);
 void MagCalibrateEnable(void);
 
 Vector3f_t GetMagOffsetCaliData(void);

@@ -20,6 +20,6 @@ void BaroDataUpdate(void);
 void BaroPresRead(float *pres);
 void BaroTempRead(float *temp);
 
-void TempCtrlSetTemp(int16_t temp);
+void TempControlSet(uint16_t temp);
 
 #endif

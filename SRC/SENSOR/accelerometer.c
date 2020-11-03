@@ -13,6 +13,8 @@
 
 ACCELEROMETER_t _acc;
 
+#define ACC_FILTER 0.25f
+#define ANO_CALI
 
 /**********************************************************************************************************
 *函 数 名: AccPreTreatInit
@@ -67,21 +69,45 @@ void AccPreTreatInit(void)
 	
 	//加速度低通滤波系数计算
 	LowPassFilter2ndFactorCal(0.001, ACC_LPF_CUT, &_acc.lpf_2nd);
+	
+	//使能加速度计Z方向校准
+	AccZaxisCalibrateEnable();
+	
 }
 
 /**********************************************************************************************************
 *函 数 名: AccDataPreTreat
 *功能说明: 加速度数据预处理
-*形    参: 加速度原始数据 加速度预处理数据指针
+*形    参: 加速度原始数据指针 加速度预处理数据指针
 *返 回 值: 无
 **********************************************************************************************************/
+#ifdef ANO_CALI
+void AccDataPreTreat(Vector3f_t *accRaw, Vector3f_t *accPre)
+{
+	//加速度数据校准
+	_acc.data.x = (accRaw->x - _acc.cali.offset.x) * _acc.cali.scale.x;
+    _acc.data.y = (accRaw->y - _acc.cali.offset.y) * _acc.cali.scale.y;
+    _acc.data.z = (accRaw->z - _acc.cali.offset.z) * _acc.cali.scale.z;
+	
+	//软件低通滤波
+	_acc.lpf[4] = _acc.data;
+	for(u8 j=4; j>0; j--)
+	{
+		_acc.lpf[j-1].x += ACC_FILTER * (_acc.lpf[j].x - _acc.lpf[j-1].x);
+		_acc.lpf[j-1].y += ACC_FILTER * (_acc.lpf[j].y - _acc.lpf[j-1].y);
+		_acc.lpf[j-1].z += ACC_FILTER * (_acc.lpf[j].z - _acc.lpf[j-1].z);
+	}
+	
+	*accPre = _acc.lpf[0];
+}
+#else
 float ACCDATAX, ACCDATAY, ACCDATAZ, ACCLPFX, ACCLPFY, ACCLPFZ;
-void AccDataPreTreat(Vector3f_t accRaw, Vector3f_t* accPre)
+void AccDataPreTreat(Vector3f_t *accRaw, Vector3f_t* accPre)
 {
 	static float lastAccMag, accMagderi;
 	const float deltaT = 0.001f;
 	
-	_acc.data = accRaw;
+	_acc.data = *accRaw;
 	
 	//加速度数据校准
 	_acc.data.x = (_acc.data.x - _acc.cali.offset.x) * _acc.cali.scale.x;
@@ -99,6 +125,7 @@ void AccDataPreTreat(Vector3f_t accRaw, Vector3f_t* accPre)
 	ACCLPFX = _acc.dataLpf.x;
 	ACCLPFY = _acc.dataLpf.y;
 	ACCLPFZ = _acc.dataLpf.z;
+
 	
 	//计算加速度模值
 	_acc.mag = Pythagorous3(_acc.dataLpf.x, _acc.dataLpf.y, _acc.dataLpf.z);
@@ -110,14 +137,62 @@ void AccDataPreTreat(Vector3f_t accRaw, Vector3f_t* accPre)
 	
 	*accPre = _acc.data;
 }
-
+#endif
 /**********************************************************************************************************
 *函 数 名: AccCalibration
 *功能说明: 加速度校准
 *形    参: 加速度原始数据
 *返 回 值: 无
 **********************************************************************************************************/
-void AccCalibration(Vector3f_t accRaw)
+#ifdef ANO_CALI
+void AccCalibration(Vector3f_t *accRaw)
+{
+	static uint16_t caliCnt = 0;
+	static Vector3f_t samples;
+	
+	if(!_acc.cali.should_cali)
+		return;
+	
+	if(GetImuOrientation() == ORIENTATION_UP)
+	{
+		//判断IMU是否处于静止状态
+		if(GetPlaceStatus() == STATIC)
+		{
+			caliCnt++;
+			samples.x += accRaw->x;
+			samples.y += accRaw->y;
+			samples.z += accRaw->z + 1.0f;		//消除1g
+		}
+		else	//清空
+		{
+			caliCnt = 0;
+			samples.x = samples.y = samples.z = 0.0f;
+		}
+			
+		
+		if(caliCnt >= 1000)
+		{
+			_acc.cali.offset.x = samples.x / 1000;
+			_acc.cali.offset.y = samples.y / 1000;
+			_acc.cali.offset.z = samples.z / 1000;
+			
+			//存储参数
+			ParamUpdateData(PARAM_ACC_OFFSET_X, &_acc.cali.offset.x);
+			ParamUpdateData(PARAM_ACC_OFFSET_Y, &_acc.cali.offset.y);
+			ParamUpdateData(PARAM_ACC_OFFSET_Z, &_acc.cali.offset.z);
+			
+			printf("Accelerometer calibration completed!");
+			
+			//校准清零
+			caliCnt = 0;
+			samples.x = samples.y = samples.z = 0.0f;
+			_acc.cali.should_cali = 0;
+			SetCaliStatus(NoCali);
+		}
+	}
+}
+#else
+void AccCalibration(Vector3f_t *accRaw)
 {
 	static uint16_t samples_count = 0;
 	static uint8_t orientationCaliFlag[6];
@@ -265,9 +340,9 @@ void AccCalibration(Vector3f_t accRaw)
 	{
 		if(samples_count < 1000)
 		{
-			samples[_acc.cali.step-1].x += accRaw.x;
-			samples[_acc.cali.step-1].y += accRaw.y;
-			samples[_acc.cali.step-1].z += accRaw.z;
+			samples[_acc.cali.step-1].x += accRaw->x;
+			samples[_acc.cali.step-1].y += accRaw->y;
+			samples[_acc.cali.step-1].z += accRaw->z;
 			samples_count++;
 		}
 		else if(samples_count == 1000)
@@ -357,7 +432,7 @@ void AccCalibration(Vector3f_t accRaw)
 			orientationCaliFlag[i] = 0;
 	}
 }	
-
+#endif
 
 /**********************************************************************************************************
 *函 数 名: ImuLevelCalibration
@@ -446,6 +521,51 @@ void ImuLevelCalibration(void)
 }
 
 /**********************************************************************************************************
+*函 数 名: AccZaxisCalibration
+*功能说明: 加速度传感器的Z轴对准，一般用于开机
+*形    参: 加速度原始数据向量指针
+*返 回 值: 无
+**********************************************************************************************************/
+void AccZaxisCalibration(Vector3f_t *accRaw)
+{
+	static uint16_t caliCnt = 0;
+	static Vector3f_t samples;
+	static float acc_z[4];
+	
+	if(!_acc.ZaxisCali.should_cali)
+		return;
+	
+	caliCnt++;
+	samples.x += _acc.data.x;
+	samples.y += _acc.data.y;
+	samples.z += accRaw->z;
+	
+	if(caliCnt >= 100)
+	{
+		acc_z[0] = samples.x / 100;
+		acc_z[1] = samples.y / 100;
+		acc_z[2] = samples.z / 100;
+		samples.x = samples.y = samples.z = 0.0f;
+		
+		acc_z[3] = Sqrt(1.0f - Sq(acc_z[0]) - Sq(acc_z[1]));
+		
+		_acc.cali.offset.z = acc_z[2] + acc_z[3];
+		
+		//存储参数
+		ParamUpdateData(PARAM_ACC_OFFSET_Z, &_acc.cali.offset.z);
+			
+		printf("Accelerometer Z axis calibration completed!");
+		
+		//校准清零
+		_acc.ZaxisCali.should_cali = 0;
+		caliCnt = 0;
+		SetCaliStatus(NoCali);
+	}
+	
+}
+
+
+/**********************************************************************************************************
 *函 数 名: AccCalibrateEnable
 *功能说明: 加速度校准使能
 *形    参: 无
@@ -454,6 +574,7 @@ void ImuLevelCalibration(void)
 void AccCalibrateEnable(void)
 {
     _acc.cali.should_cali = 1;
+	SetCaliStatus(AccCaliDataCollecting);	//绿灯快闪
 }
 
 /**********************************************************************************************************
@@ -464,8 +585,20 @@ void AccCalibrateEnable(void)
 **********************************************************************************************************/
 void LevelCalibrateEnable(void)
 {
-  _acc.levelCali.should_cali = 1;
+	_acc.levelCali.should_cali = 1;
 	SetCaliStatus(ImuLevelCali);
+}
+
+/**********************************************************************************************************
+*函 数 名: AccZaxisCalibrateEnable
+*功能说明: 加速度计Z方向模长校准
+*形    参: 无
+*返 回 值: 无
+**********************************************************************************************************/
+void AccZaxisCalibrateEnable(void)
+{
+	_acc.ZaxisCali.should_cali = 1;
+	SetCaliStatus(AccZaxisCali);
 }
 
 /**********************************************************************************************************

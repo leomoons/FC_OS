@@ -15,6 +15,8 @@
 
 GYROSCOPE_t _gyro;
 
+#define GYRO_FILTER 0.25f
+#define ANO_CALI
 
 /**********************************************************************************************************
 *函 数 名: GyroPreTreatInit
@@ -52,20 +54,38 @@ void GyroPreTreatInit(void)
 /**********************************************************************************************************
 *函 数 名: GyroDataPreTreat
 *功能说明: 陀螺仪数据预处理
-*形    参: 陀螺仪原始数据 陀螺仪预处理数据指针
+*形    参: 陀螺仪原始数据指针 温度 角速度向量指针 低通滤波角速度向量指针
 *返 回 值: 无
 **********************************************************************************************************/
+#ifdef ANO_CALI
+void GyroDataPreTreat(Vector3f_t *gyroRaw, float temperature, Vector3f_t *gyroData, Vector3f_t *gyroLpfData)
+{
+	*gyroData = _gyro.data = Vector3f_Sub(*gyroRaw, _gyro.cali.offset);
+	
+	
+	//软件低通滤波
+	_gyro.lpf[4] = _gyro.data;
+	for(u8 j=4; j>0; j--)
+	{
+		_gyro.lpf[j-1].x += GYRO_FILTER * (_gyro.lpf[j].x - _gyro.lpf[j-1].x);
+		_gyro.lpf[j-1].y += GYRO_FILTER * (_gyro.lpf[j].y - _gyro.lpf[j-1].y);
+		_gyro.lpf[j-1].z += GYRO_FILTER * (_gyro.lpf[j].z - _gyro.lpf[j-1].z);
+	}
+	
+	*gyroLpfData = _gyro.lpf[0];
+}
+#else
 Vector3f_t gyrotmp;
-void GyroDataPreTreat(Vector3f_t gyroRaw, float temperature, Vector3f_t* gyroData, Vector3f_t* gyroLpfData)
+void GyroDataPreTreat(Vector3f_t *gyroRaw, float temperature, Vector3f_t *gyroData, Vector3f_t *gyroLpfData)
 {
 	
 	//获取温度值
 	_gyro.temperature = temperature;
 	
 	//零偏误差校准
-	gyrotmp.x = (gyroRaw.x - _gyro.cali.offset.x) * _gyro.cali.scale.x;
-	gyrotmp.y = (gyroRaw.y - _gyro.cali.offset.y) * _gyro.cali.scale.y;
-	gyrotmp.z = (gyroRaw.z - _gyro.cali.offset.z) * _gyro.cali.scale.z;
+	gyrotmp.x = (gyroRaw->x - _gyro.cali.offset.x) * _gyro.cali.scale.x;
+	gyrotmp.y = (gyroRaw->y - _gyro.cali.offset.y) * _gyro.cali.scale.y;
+	gyrotmp.z = (gyroRaw->z - _gyro.cali.offset.z) * _gyro.cali.scale.z;
 	
 	//安装误差校准
 	_gyro.data = VectorRotateToBodyFrame(gyrotmp, GetLevelCalibraData());
@@ -76,6 +96,7 @@ void GyroDataPreTreat(Vector3f_t gyroRaw, float temperature, Vector3f_t* gyroDat
 	*gyroData = _gyro.data;
 	*gyroLpfData = _gyro.dataLpf;
 }
+#endif
 
 /**********************************************************************************************************
 *函 数 名: GyroCalibration
@@ -83,7 +104,43 @@ void GyroDataPreTreat(Vector3f_t gyroRaw, float temperature, Vector3f_t* gyroDat
 *形    参: 陀螺仪原始数据
 *返 回 值: 无
 **********************************************************************************************************/
-void GyroCalibration(Vector3f_t gyroRaw)
+#ifdef ANO_CALI
+void GyroCalibration(Vector3f_t *gyroRaw)
+{
+	static uint16_t caliCnt = 0;
+	static Vector3f_t samples;
+	
+	if(!_gyro.cali.should_cali)
+		return;
+	
+	caliCnt++;
+	samples.x += gyroRaw->x;
+	samples.y += gyroRaw->y;
+	samples.z += gyroRaw->z;
+	
+	if(caliCnt >= 1000)
+	{
+		_gyro.cali.offset.x = samples.x / 1000;
+		_gyro.cali.offset.y = samples.y / 1000;
+		_gyro.cali.offset.z = samples.z / 1000;
+		
+		//存储参数
+        ParamUpdateData(PARAM_GYRO_OFFSET_X, &_gyro.cali.offset.x);
+        ParamUpdateData(PARAM_GYRO_OFFSET_Y, &_gyro.cali.offset.y);
+        ParamUpdateData(PARAM_GYRO_OFFSET_Z, &_gyro.cali.offset.z);
+		
+		printf("Gyroscope calibreation completed");
+		
+		//校准清零
+		caliCnt = 0;
+		samples.x = samples.y = samples.z = 0.0f;
+		_gyro.cali.should_cali = 0;
+		SetCaliStatus(NoCali);
+		
+	}
+}
+#else
+void GyroCalibration(Vector3f_t *gyroRaw)
 {
 	const int16_t CALIBRATING_GYRO_CYCLES = 1000;
 	static float gyro_sum[3] = {0, 0, 0};
@@ -94,7 +151,7 @@ void GyroCalibration(Vector3f_t gyroRaw)
 	if(!_gyro.cali.should_cali)
 		return;
 	
-	gyro_raw_temp = gyroRaw;
+	gyro_raw_temp = *gyroRaw;
 	
 	gyro_sum[0] += gyro_raw_temp.x;
 	gyro_sum[1] += gyro_raw_temp.y;
@@ -169,6 +226,7 @@ void GyroCalibration(Vector3f_t gyroRaw)
 		SetCaliStatus(NoCali);
 	}
 }
+#endif
 
 /**********************************************************************************************************
 *函 数 名: GetGyroCaliStatus

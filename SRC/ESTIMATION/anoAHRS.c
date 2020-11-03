@@ -8,7 +8,7 @@
 #include "anoAHRS.h"
 #include "boardConfig.h"
 
-//#define USE_MAG
+#define USE_MAG
 
 
 /*参考坐标，定义为ANO坐标*
@@ -35,12 +35,12 @@ void AnoAHRSinit(void)
 {
 	ano_state.akp = 0.2f;
 	ano_state.aki = 0.01f;
-	ano_state.mkp = 0.1f;
+	ano_state.mkp = 1.0f;	//0.1f
 	
-	_ano.w = 1;
-	_ano.x = 0;
-	_ano.y = 0;
-	_ano.z = 0;
+	_ano.quat[0] = 1;
+	_ano.quat[1] = 0;
+	_ano.quat[2] = 0;
+	_ano.quat[3] = 0;
 }
 
 
@@ -66,41 +66,45 @@ void AnoAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 	dT_s = ConstrainFloat(dT_s, 0.0005, 0.002);
 	previousT = GetSysTimeUs();
 	
-	q0q1 = _ano.w * _ano.x;
-	q0q2 = _ano.w * _ano.y;
-	q1q1 = _ano.x * _ano.x;
-	q1q3 = _ano.x * _ano.z;
-	q2q2 = _ano.y * _ano.y;
-	q2q3 = _ano.y * _ano.z;
-	q3q3 = _ano.z * _ano.z;
-	q1q2 = _ano.x * _ano.y;
-	q0q3 = _ano.w * _ano.z;
+	q0q1 = _ano.quat[0] * _ano.quat[1];
+	q0q2 = _ano.quat[0] * _ano.quat[2];
+	q1q1 = _ano.quat[1] * _ano.quat[1];
+	q1q3 = _ano.quat[1] * _ano.quat[3];
+	q2q2 = _ano.quat[2] * _ano.quat[2];
+	q2q3 = _ano.quat[2] * _ano.quat[3];
+	q3q3 = _ano.quat[3] * _ano.quat[3];
+	q1q2 = _ano.quat[1] * _ano.quat[2];
+	q0q3 = _ano.quat[0] * _ano.quat[3];
+	
+	_ano.gra_acc.x = -acc.x;
+	_ano.gra_acc.y = -acc.y;
+	_ano.gra_acc.z = -acc.z;
 	
 	//加速度归一化
-	acc_norm_l = Pythagorous3(acc.x, acc.y, acc.z);
-	acc_norm.x = acc.x / acc_norm_l;
-	acc_norm.y = acc.y / acc_norm_l;
-	acc_norm.z = acc.z / acc_norm_l;
+	acc_norm_l = Pythagorous3(_ano.gra_acc.x, _ano.gra_acc.y, _ano.gra_acc.z);
+	acc_norm.x = _ano.gra_acc.x / acc_norm_l;
+	acc_norm.y = _ano.gra_acc.y / acc_norm_l;
+	acc_norm.z = _ano.gra_acc.z / acc_norm_l;
 	
 	
 	//机体坐标下的x方向向量，单位化
-	_ano.dcMat[0] = x_vec.x = 1 - (2*q2q2 + 2*q3q3);
-	_ano.dcMat[1] = x_vec.y = 2*q1q2 - 2*q0q3;
-	_ano.dcMat[2] = x_vec.z = 2*q1q3 + 2*q0q2;
+	_ano.dcm[0] = x_vec.x = 1 - (2*q2q2 + 2*q3q3);
+	_ano.dcm[1] = x_vec.y = 2*q1q2 - 2*q0q3;
+	_ano.dcm[2] = x_vec.z = 2*q1q3 + 2*q0q2;
 		
-	_ano.dcMat[3] = y_vec.x = 2*q1q2 + 2*q0q3;
-	_ano.dcMat[4] = y_vec.y = 1 - (2*q1q1 + 2*q3q3);
-	_ano.dcMat[5] = y_vec.z = 2*q2q3 - 2*q0q1;
+	_ano.dcm[3] = y_vec.x = 2*q1q2 + 2*q0q3;
+	_ano.dcm[4] = y_vec.y = 1 - (2*q1q1 + 2*q3q3);
+	_ano.dcm[5] = y_vec.z = 2*q2q3 - 2*q0q1;
 		
-	_ano.dcMat[6] = z_vec.x = 2*q1q3 - 2*q0q2;
-	_ano.dcMat[7] = z_vec.y = 2*q2q3 + 2*q0q1;
-	_ano.dcMat[8] = z_vec.z = 1 - (2*q1q1 + 2*q2q2);
+	_ano.dcm[6] = z_vec.x = 2*q1q3 - 2*q0q2;
+	_ano.dcm[7] = z_vec.y = 2*q2q3 + 2*q0q1;
+	_ano.dcm[8] = z_vec.z = 1 - (2*q1q1 + 2*q2q2);
 	
 	
 	//测量值与等效重力向量的叉积（计算向量误差）
-	vec_err.x =  (acc_norm.y * _ano.dcMat[8] - _ano.dcMat[7] * acc_norm.z);
-	vec_err.y = -(acc_norm.x * _ano.dcMat[8] - _ano.dcMat[6] * acc_norm.z);
-	vec_err.z = -(acc_norm.y * _ano.dcMat[6] - _ano.dcMat[7] * acc_norm.x);
+	vec_err.x =  (acc_norm.y * z_vec.z - z_vec.y * acc_norm.z);
+	vec_err.y = -(acc_norm.x * z_vec.z - z_vec.x * acc_norm.z);
+	vec_err.z = -(acc_norm.y * z_vec.x - z_vec.y * acc_norm.x);
 	
 	
 #ifdef USE_MAG
@@ -108,7 +112,7 @@ void AnoAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 	if(!(mag.x==0 && mag.y==0 && mag.z==0))
 	{
 		//把机体坐标下的罗盘数据转换到地理坐标下
-		_ano.mag_w = Matrix3MulVector3(_ano.dcMat, mag);
+		_ano.mag_w = Matrix3MulVector3(_ano.dcm, mag);
 		//计算磁场方向向量归一化的模
 		float mag_norm = Pythagorous2(_ano.mag_w.x, _ano.mag_w.y);
 		//计算南北朝向向量
@@ -133,25 +137,25 @@ void AnoAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 
 	//构造增量旋转（含融合纠正）
 #ifdef USE_MAG	
-	d_angle.x = (gyro.x+(vec_err.x+vec_err_i.x)*ano_state.akp + mag_yaw_err*_ano.dcMat[6]*ano_state.mkp) * dT_s/2;
-	d_angle.y = (gyro.y+(vec_err.y+vec_err_i.y)*ano_state.akp + mag_yaw_err*_ano.dcMat[7]*ano_state.mkp) * dT_s/2;
-	d_angle.z = (gyro.z+(vec_err.z+vec_err_i.z)*ano_state.akp + mag_yaw_err*_ano.dcMat[8]*ano_state.mkp) * dT_s/2;
+	d_angle.x = (gyro.x+(vec_err.x+vec_err_i.x)*ano_state.akp + mag_yaw_err*_ano.dcm[6]*ano_state.mkp) * dT_s/2;
+	d_angle.y = (gyro.y+(vec_err.y+vec_err_i.y)*ano_state.akp + mag_yaw_err*_ano.dcm[7]*ano_state.mkp) * dT_s/2;
+	d_angle.z = (gyro.z+(vec_err.z+vec_err_i.z)*ano_state.akp + mag_yaw_err*_ano.dcm[8]*ano_state.mkp) * dT_s/2;
 #else
 	d_angle.x = (gyro.x+(vec_err.x+vec_err_i.x)*ano_state.akp) * dT_s/2;
 	d_angle.y = (gyro.y+(vec_err.y+vec_err_i.y)*ano_state.akp) * dT_s/2;
 	d_angle.z = (gyro.z+(vec_err.z+vec_err_i.z)*ano_state.akp) * dT_s/2;
 #endif
 	//更新姿态
-	_ano.w = _ano.w			      - _ano.x*d_angle.x - _ano.y*d_angle.y - _ano.z*d_angle.z;
-	_ano.x = _ano.w*d_angle.x + _ano.x           + _ano.y*d_angle.z - _ano.z*d_angle.y;
-	_ano.y = _ano.w*d_angle.y + _ano.x*d_angle.z + _ano.y           - _ano.z*d_angle.x;
-	_ano.z = _ano.w*d_angle.z + _ano.x*d_angle.y + _ano.y*d_angle.x - _ano.z;
+	_ano.quat[0] = _ano.quat[0]			  - _ano.quat[1]*d_angle.x - _ano.quat[2]*d_angle.y - _ano.quat[3]*d_angle.z;
+	_ano.quat[1] = _ano.quat[0]*d_angle.x + _ano.quat[1]           + _ano.quat[2]*d_angle.z - _ano.quat[3]*d_angle.y;
+	_ano.quat[2] = _ano.quat[0]*d_angle.y - _ano.quat[1]*d_angle.z + _ano.quat[2]           + _ano.quat[3]*d_angle.x;
+	_ano.quat[3] = _ano.quat[0]*d_angle.z + _ano.quat[1]*d_angle.y - _ano.quat[2]*d_angle.x + _ano.quat[3];
 	
-	q_norm_l = Pythagorous4(_ano.w, _ano.x, _ano.y, _ano.z);
-	_ano.w /= q_norm_l;
-	_ano.x /= q_norm_l;
-	_ano.y /= q_norm_l;
-	_ano.z /= q_norm_l;
+	q_norm_l = Pythagorous4(_ano.quat[0], _ano.quat[1], _ano.quat[2], _ano.quat[3]);
+	_ano.quat[0] /= q_norm_l;
+	_ano.quat[1] /= q_norm_l;
+	_ano.quat[2] /= q_norm_l;
+	_ano.quat[3] /= q_norm_l;
 	
 	/*******************修正开关，根据飞行状态来调整迭代系数*********************/
 	//TODO:
@@ -165,7 +169,7 @@ void AnoAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 **********************************************************************************************************/
 void AnoGetDCM(float* dcm)
 {
-	Matrix3_Copy(_ano.dcMat, dcm);
+	Matrix3_Copy(_ano.dcm, dcm);
 }
 
 /**********************************************************************************************************
@@ -176,8 +180,20 @@ void AnoGetDCM(float* dcm)
 **********************************************************************************************************/
 void AnoGetEuler(Vector3f_t *euler)
 {
-	float quat[4] = {_ano.w, _ano.x, _ano.y, _ano.z};
-	*euler = Quater_to_Euler(quat);
+	float quat[4] = {_ano.quat[0], _ano.quat[1], _ano.quat[2], _ano.quat[3]};
+	_ano.euler = *euler = Quater_to_Euler(quat);
+	euler->z = -euler->z;
+	euler->y = -euler->y;
+	
+//	float t_temp = LIMIT(1 - Sq(_ano.dcm[6]), 0, 1);
+//	
+//	if(abs(_ano.dcm[8])>0.05f)//避免奇点的运算
+//	{
+//			_ano.euler.x =  fast_atan2(_ano.dcm[6],Sqrt(t_temp));
+//			_ano.euler.y =  fast_atan2(_ano.dcm[7], _ano.dcm[8]); 
+//		    _ano.euler.z = -fast_atan2(_ano.dcm[3], _ano.dcm[0]); 
+//	}
+//	*euler = _ano.euler;
 }
 
 

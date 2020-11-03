@@ -245,7 +245,7 @@ void BaroTempRead(float* temp)
 *形    参: 读出数据指针
 *返 回 值: 无
 **********************************************************************************************************/
-void TempControlSet(int16_t value)
+void TempControlSet(uint16_t value)
 {
 	
 #if(configUSE_SENSORHEAT == 1)

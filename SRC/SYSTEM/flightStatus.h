@@ -18,6 +18,7 @@ enum
 	ImuLevelCali,			//IMU水平补偿
 	AccCaliDataCollecting,	//加速度计采集数据中
 	AccCaliOneDataReady,	//加速度计一个方向的数据采集完毕，提示切换到下一个方向
+	AccZaxisCali,			//加速度的Z防线单独校准
 	GyroCali,				//陀螺仪校准
 	MagCaliHorizontal,		//磁罗盘校准中的水平旋转
 	MagCaliVertical,		//磁罗盘校准中的竖直旋转

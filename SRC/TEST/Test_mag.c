@@ -17,9 +17,9 @@
 #include "gyroscope.h"
 #include "magnetometer.h"
 
-Vector3f_t gyroR, gyroP, gyroLpf;
-Vector3f_t accR, accP;
-Vector3f_t magR, magP;
+Vector3f_t gyroR1, gyroP, gyroLpf;
+Vector3f_t accR1, accP;
+Vector3f_t magR1, magP;
 float tempR;
 
 int main()
@@ -58,7 +58,7 @@ int main()
 		if(cnt%10 == 0)		//100Hz
 		{
 			MagDataUpdate();
-			MagDataRead(&magR);
+			MagDataRead(&magR1);
 		}
 		
 		/****test3: 测试校准和预处理功能******/
@@ -80,19 +80,19 @@ int main()
 		DelayUs(10);
 		IMUtempUpdate();
 		DelayUs(10);
-		AccDataRead(&accR);
-		GyroDataRead(&gyroR);
+		AccDataRead(&accR1);
+		GyroDataRead(&gyroR1);
 		IMUtempRead(&tempR);
 		ImuLevelCalibration();
-		AccCalibration(accR);
-		AccDataPreTreat(accR, &accP);
-		GyroCalibration(gyroR);
-		GyroDataPreTreat(gyroR, tempR, &gyroP, &gyroLpf);
+		AccCalibration(&accR1);
+		AccDataPreTreat(&accR1, &accP);
+		GyroCalibration(&gyroR1);
+		GyroDataPreTreat(&gyroR1, tempR, &gyroP, &gyroLpf);
 		
 		if(cnt%10 == 0)
 		{
-			MagCalibration(magR, gyroLpf);
-			MagDataPreTreat(magR, &magP);
+			MagCalibration(&magR1, &gyroLpf);
+			MagDataPreTreat(&magR1, &magP);
 		}
 		
 		

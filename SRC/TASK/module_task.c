@@ -76,11 +76,11 @@ portTASK_FUNCTION(vImuSensorReadTask, pvParameters)
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
-
+Vector3f_t MAGRAW2;
 portTASK_FUNCTION(vOtherSensorReadTask, pvParameters)
 {
 	portTickType xLastWakeTime;
-	static uint16_t cnt = 0;
+	uint32_t cnt = 0;	//static型不能全局同变量名
 	
 	Vector3f_t *magRaw = pvPortMalloc(sizeof(Vector3f_t));
 	float *baroPres = pvPortMalloc(sizeof(float));
@@ -101,18 +101,21 @@ portTASK_FUNCTION(vOtherSensorReadTask, pvParameters)
 	
 	while(1)
 	{
-		//地磁传感器数据更新(100Hz)
+		cnt++;
+		cnt %= 20;
+		//地磁传感器数据更新(50Hz)
 		if(cnt%2 == 0)
 		{
 			vTaskSuspendAll();
 			MagDataUpdate();
-			xTaskResumeAll();
 			MagDataRead(magRaw);
+			xTaskResumeAll();
+			MAGRAW2 = *magRaw;
 			xQueueSendToBack(messageQueue[MAG_SENSOR_READ], (void *)&magRaw, 0);
 		}
-		
+			
 		//气压传感器数据更新(50Hz)
-		if(cnt%4 == 0)
+		if(cnt%2 == 0)
 		{
 			//读取气压计数据时挂起调度器，防止SPI总线冲突
 			vTaskSuspendAll();
@@ -125,7 +128,7 @@ portTASK_FUNCTION(vOtherSensorReadTask, pvParameters)
 		}
 		
 		//飞控参数保存(参数有更新才会写入)20Hz
-		if(cnt%10 == 0)
+		if(cnt%5 == 0)
 		{
 			ParamSaveToFlash();
 		}
@@ -133,10 +136,8 @@ portTASK_FUNCTION(vOtherSensorReadTask, pvParameters)
 		//RGB闪烁
 		RGB_Flash();
 		
-		cnt++;
-		
-		//睡眠5ms
-		vTaskDelayUntil(&xLastWakeTime, (5/portTICK_RATE_MS));
+		//睡眠10ms
+		vTaskDelayUntil(&xLastWakeTime, (10/portTICK_RATE_MS));
 	}
 }
 
@@ -148,18 +149,7 @@ portTASK_FUNCTION(vOtherSensorReadTask, pvParameters)
 **********************************************************************************************************/
 void ModuleTaskCreate(void)
 {
-    xTaskCreate(vImuSensorReadTask, 
-				"imuSensorRead", 
-				IMU_SENSOR_READ_TASK_STACK, 
-				NULL, 
-				IMU_SENSOR_READ_TASK_PRIORITY, 
-				&imuSensorReadHandle);
-    xTaskCreate(vOtherSensorReadTask, 
-				"sensorUpdate", 
-				OTHER_SENSOR_READ_TASK_STACK, 
-				NULL, 
-				OTHER_SENSOR_READ_TASK_PRIORITY, 
-				&otherSensorReadHandle);
-	
+	xTaskCreate(vImuSensorReadTask, "imuSensorRead", IMU_SENSOR_READ_TASK_STACK, NULL,  IMU_SENSOR_READ_TASK_PRIORITY, &imuSensorReadHandle);
+    xTaskCreate(vOtherSensorReadTask, "sensorUpdate", OTHER_SENSOR_READ_TASK_STACK, NULL, OTHER_SENSOR_READ_TASK_PRIORITY, &otherSensorReadHandle);
 }
 

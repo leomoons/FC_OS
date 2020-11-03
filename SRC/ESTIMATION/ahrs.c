@@ -15,7 +15,7 @@ enum
 	MAHONY
 };
 
-#define AHRSalgorithm MAHONY
+#define AHRSalgorithm ANO 
 
 
 
