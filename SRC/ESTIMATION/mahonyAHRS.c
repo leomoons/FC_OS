@@ -10,7 +10,7 @@
 #include "ahrs.h"
 
 #define twoKpDef	(2.0f * 0.5f)	// 2 * proportional gain
-#define twoKiDef	(2.0f * 0.0f)	// 2 * integral gain
+#define twoKiDef	(2.0f * 0.1f)	// 2 * integral gain
 
 volatile float twoKp;											// 2 * proportional gain (Kp)
 volatile float twoKi;											// 2 * integral gain (Ki)					// quaternion of sensor frame relative to auxiliary frame
@@ -59,6 +59,8 @@ void MahonyAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 	float dT_s = (GetSysTimeUs() - previousT) * 1e-6;
 	dT_s = ConstrainFloat(dT_s, 5e-4, 2e-3);
 	previousT = GetSysTimeUs();
+	
+	acc.z = -acc.z;
 	
 	//Use IMU algorithm if magnetometer mesaurement invvalid (avoids NaN in magnetometer normalisation)
 	if(mag.x==0.0f && mag.y==0.0f && mag.z==0.0f)

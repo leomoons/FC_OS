@@ -15,12 +15,12 @@ typedef struct
 
 void SetPointUpdate(void);
 
-Vector3f_t GetDesiredPos(void);
-Vector3f_t GetDesiredVel(void);
-Vector3f_t GetDesiredAcc(void);
+void GetDesiredPos(Vector3f_t *pos);
+void GetDesiredVel(Vector3f_t *vel);
+void GetDesiredAcc(Vector3f_t *acc);
 
 void GetDesiredAtt(float *dcm);
-Vector3f_t GetDesiredAngVel(void);
-Vector3f_t GetDesiredAngAcc(void);
+void GetDesiredAngVel(Vector3f_t *ang_vel);
+void GetDesiredAngAcc(Vector3f_t *ang_acc);
 
 #endif

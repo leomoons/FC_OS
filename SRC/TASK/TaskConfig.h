@@ -16,6 +16,7 @@
 #include "sensor_task.h"
 #include "message_task.h"
 #include "navigation_task.h"
+#include "control_task.h"
 
 //任务堆栈大小
 #define IMU_SENSOR_READ_TASK_STACK			256

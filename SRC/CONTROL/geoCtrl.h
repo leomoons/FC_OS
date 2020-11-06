@@ -28,8 +28,8 @@ typedef struct
 }GeoControl_t;
 extern GeoControl_t _geo;
 
-void GeoParamInit(void);
-void GeoCtrlTask(Vector3f_t W_fb);
+void GeoControllerInit(void);
+void GeoCtrlTask(void);
 
 
 #endif

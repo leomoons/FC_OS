@@ -11,9 +11,11 @@
 #include "mathConfig.h"
 #include "controller.h"
 
+
 #include "ahrs.h"
 #include "setPoint.h"
 #include "optitrack.h"
+#include "gyroscope.h"
 #define MAX_POS_DES	2	//手动飞行中摇杆所能对应的最大位置误差（单位：m）
 #define MAX_ATT_DES	2	//手动飞行中摇杆所能对应的最大角度误差（单位:rad）
 #define VEL_DEFAULT 0.5	//手动飞行中默认的线速度大小(m/s)
@@ -23,12 +25,12 @@
 GeoControl_t _geo;
 
 /**********************************************************************************************************
-*函 数 名: GeoParamInit
+*函 数 名: GeoControllerInit
 *功能说明: 几何控制器参数初始化
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
-void GeoParamInit(void)
+void GeoControllerInit(void)
 {
 	_geo.Kp[0]=-3; _geo.Kp[1]= 0; _geo.Kp[2]= 0;
 	_geo.Kp[3]= 0; _geo.Kp[4]=-3; _geo.Kp[5]= 0;
@@ -176,7 +178,7 @@ static Vector3f_t MomentCal(void)
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
-void GeoCtrlTask(Vector3f_t W_fb)
+void GeoCtrlTask(void)
 {
 	//不同的飞行模式选择不同的轨线期望值和反馈值来源
 	if(GetFlightMode() == MANUAL)
@@ -220,18 +222,18 @@ void GeoCtrlTask(Vector3f_t W_fb)
 		Euler_to_DCM(_geo.R_des, att_des);	
 		/*************获取当前角度和角速度，来自IMU，采用rad***************/
 		GetDCM(_geo.R_fb);
-		_geo.W_fb = W_fb;
+		_geo.W_fb = GyroLpfGetData();
 	}
 	else if(GetFlightMode() == MISSION)		//沿既定轨线飞行
 	{
 		//期望轨迹由setPoint模块生成
-		_geo.pos_des = GetDesiredPos();
-		_geo.vel_des = GetDesiredVel();
-		_geo.acc_des = GetDesiredAcc();
+		GetDesiredPos(&_geo.pos_des);
+		GetDesiredVel(&_geo.vel_des);
+		GetDesiredAcc(&_geo.acc_des);
 		
 		GetDesiredAtt(_geo.R_des);
-		_geo.W_des = GetDesiredAngVel();
-		_geo.W_dot_des = GetDesiredAngAcc();
+		GetDesiredAngVel(&_geo.W_des);
+		GetDesiredAngAcc(&_geo.W_dot_des);
 		
 		//使用OptiTrack提供的真实反馈
 		_geo.pos_fb = GetOptiPos();
@@ -243,7 +245,7 @@ void GeoCtrlTask(Vector3f_t W_fb)
 		//暂时没有optitrack数据的情况
 		_geo.pos_fb.x = 1.0f;  _geo.pos_fb.y = -1.0f;  _geo.pos_fb.z = 0.0f;
 		_geo.vel_fb.x = 1.0f;  _geo.vel_fb.y = -1.0f;  _geo.vel_fb.z = 0.0f;
-		W_fb.x = 1.0f;  W_fb.y = -1.0f; W_fb.z = 0.0f;
+		_geo.W_fb.x = 1.0f;  _geo.W_fb.y = -1.0f; _geo.W_fb.z = 0.0f;
 		_geo.R_fb[0] = 1.0f;  _geo.R_fb[1] = 0.0f;  _geo.R_fb[0] = 0.0f;
 		_geo.R_fb[0] = 0.0f;  _geo.R_fb[1] = 1.0f;  _geo.R_fb[0] = 0.0f;
 		_geo.R_fb[0] = 0.0f;  _geo.R_fb[1] = 0.0f;  _geo.R_fb[0] = 1.0f;

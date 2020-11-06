@@ -9,6 +9,10 @@
 #include "TaskConfig.h"
 #include "mathConfig.h"
 #include "messageQueue.h"
+#include "controller.h"
+#include "motor.h"
+#include "setPoint.h"
+
 xTaskHandle flightControlHandle;
 
 /**********************************************************************************************************
@@ -20,19 +24,20 @@ xTaskHandle flightControlHandle;
 portTASK_FUNCTION(vFlightControlTask, pvParameters)
 {
 	portTickType xLastWakeTime;
-	
-	Vector3f_t* gyro;
-	//static uint32_t cnt = 0;
-	
-	
+
+	ControllerInit();
+	MotorInit();
 	
 	xLastWakeTime = xTaskGetTickCount();
 	
 	while(1)
 	{
-		//从消息队列中获取低通滤波后的角速度
-		xQueueReceive(messageQueue[GYRO_LPF], &gyro, (3/portTICK_RATE_MS));
-		
+		//主控算法
+		CtrlTask();
+		//电机控制
+		MotorCtrlTask();
+		//轨迹生成
+		SetPointUpdate();
 		
 		//阻塞1ms
 		vTaskDelayUntil(&xLastWakeTime, (2/portTICK_RATE_MS));

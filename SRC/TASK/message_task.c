@@ -23,7 +23,7 @@ portTASK_FUNCTION(vMessageTask, pvParameters)
 {
     portTickType xLastWakeTime;
 
-	static uint16_t cnt = 0;
+	uint32_t cnt = 0;
 	Remote_Control_Init();
 	
     xLastWakeTime = xTaskGetTickCount();

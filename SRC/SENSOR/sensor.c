@@ -32,7 +32,7 @@ void ImuOrientationDetect(void)
 	AccDataRead(&acc);
 	
 	// [ g, 0, 0 ]
-	if(fabsf(acc.x-CONSTANTS_ONE_G) < accel_err_thr &&
+	if(fabsf(acc.x - CONSTANTS_ONE_G) < accel_err_thr &&
 			fabsf(acc.y) < accel_err_thr &&
 			fabsf(acc.z) < accel_err_thr)
 	{

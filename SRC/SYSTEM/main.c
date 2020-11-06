@@ -49,6 +49,9 @@ portTASK_FUNCTION(vStartTask, pvParameters)
 	//姿态解算任务创建
 	NavigationTaskCreate();
 	
+	//控制任务创建
+	ControlTaskCreate();
+	
 	while(1)
 	{
 		
