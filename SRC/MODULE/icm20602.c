@@ -269,7 +269,7 @@ void ICM20602_UpdateAcc(void)
 	ICM20602_MultiRead(MPU_RA_ACCEL_XOUT_H, ACCbuffer, 6);//连续接受6个ICM20602寄存器的数据
 	accRaw.x = (s16)((((u16)ACCbuffer[0]) << 8) | ACCbuffer[1]);
 	accRaw.y = (s16)((((u16)ACCbuffer[2]) << 8) | ACCbuffer[3]);
-    accRaw.z = (s16)((((u16)ACCbuffer[4]) << 8) | ACCbuffer[5]);
+	accRaw.z = (s16)((((u16)ACCbuffer[4]) << 8) | ACCbuffer[5]);
 	
 	DelayUs(1);
 }

@@ -71,7 +71,7 @@ void RC_Duty_Task(u8 dT_ms)
 				else if(CH_N[i]>-100 && CH_N[i]<100)
 					SetFlightMode(MISSION);
 				else if(CH_N[i]>300)
-					SetFlightMode(MISSION);
+					SetFlightMode(FAILSAFE);
 			}
 			if(i==CH6 && CH_N[i]>100)
 			{

@@ -17,7 +17,7 @@
 #include "optitrack.h"
 #include "gyroscope.h"
 #define MAX_POS_DES	2	//手动飞行中摇杆所能对应的最大位置误差（单位：m）
-#define MAX_ATT_DES	2	//手动飞行中摇杆所能对应的最大角度误差（单位:rad）
+#define MAX_ATT_DES	1.57	//手动飞行中摇杆所能对应的最大角度误差（单位:rad）
 #define VEL_DEFAULT 0.5	//手动飞行中默认的线速度大小(m/s)
 #define ANG_VEL_DEFAULT 0.1	//手动飞行中默认的角速度大小(rad/s)
 
@@ -178,6 +178,7 @@ static Vector3f_t MomentCal(void)
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
+Vector3f_t att_des;
 void GeoCtrlTask(void)
 {
 	//不同的飞行模式选择不同的轨线期望值和反馈值来源
@@ -190,15 +191,15 @@ void GeoCtrlTask(void)
 		float W_default = ANG_VEL_DEFAULT;
 		int16_t _deadzone = 50;
 
-		Vector3f_t att_des;
+		
 		
 		//遥控通道值归一化
 		_geo.pos_des.x = ApplyDeadbandFloat(CH_N[CH7], _deadzone)*0.0023f*max_pos_des;
 		_geo.pos_des.y = ApplyDeadbandFloat(CH_N[CH8], _deadzone)*0.0023f*max_pos_des;
-		_geo.pos_des.z = ApplyDeadbandFloat(CH_N[CH3], _deadzone)*0.0023f*max_pos_des;
+		_geo.pos_des.z =-ApplyDeadbandFloat(CH_N[CH3], _deadzone)*0.0023f*max_pos_des;
 		att_des.x = ApplyDeadbandFloat(CH_N[CH1], _deadzone)*0.0023f*max_att_des;
-		att_des.y = ApplyDeadbandFloat(CH_N[CH2], _deadzone)*0.0023f*max_att_des;
-		att_des.z = ApplyDeadbandFloat(CH_N[CH4], _deadzone)*0.0023f*max_att_des;
+		att_des.y =-ApplyDeadbandFloat(CH_N[CH2], _deadzone)*0.0023f*max_att_des;
+		att_des.z =-ApplyDeadbandFloat(CH_N[CH4], _deadzone)*0.0023f*max_att_des;
 		
 		/*************位置向量及各阶导数(setpoint&feedback)**************/
 		_geo.vel_des.x = 0.0f; _geo.vel_des.y = 0.0f; _geo.vel_des.z = 0.0f;

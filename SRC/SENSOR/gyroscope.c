@@ -72,7 +72,7 @@ void GyroDataPreTreat(Vector3f_t *gyroRaw, float temperature, Vector3f_t *gyroDa
 		_gyro.lpf[j-1].z += GYRO_FILTER * (_gyro.lpf[j].z - _gyro.lpf[j-1].z);
 	}
 	
-	*gyroLpfData = _gyro.lpf[0];
+	_gyro.dataLpf = *gyroLpfData = _gyro.lpf[0];
 }
 #else
 Vector3f_t gyrotmp;
