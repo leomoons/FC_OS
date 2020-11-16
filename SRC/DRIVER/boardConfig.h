@@ -33,10 +33,16 @@ enum
 /**********************************************************************************************************
 *传感器安装方向
 **********************************************************************************************************/
+//#define UP_FRAME
+#ifdef UP_FRAME
 #define GYRO_ROTATION       ROTATION_YAW_270
 #define ACC_ROTATION        ROTATION_YAW_90
 #define MAG_ROTATION        ROTATION_ROLL_180
-
+#else
+#define GYRO_ROTATION 			ROTATION_GYRO_DOWN
+#define ACC_ROTATION				ROTATION_ACC_DOWN
+#define MAG_ROTATION				ROTATION_NONE
+#endif
 /**********************************************************************************************************
 *传感器配置
 **********************************************************************************************************/

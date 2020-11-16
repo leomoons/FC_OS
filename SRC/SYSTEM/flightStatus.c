@@ -22,35 +22,33 @@ void PlaceStatusCheck(Vector3f_t gyro)
 {
 	Vector3f_t gyroDiff;
 	static Vector3f_t lastGyro;
-	static float threshold = 0.05f;
-	static uint16_t checkNum = 0;
-	static int16_t count = 0;
+	static float threshold1 = 0.05f;
+	static uint32_t chk_1 = 0;
+	static uint32_t cnt_1 = 0;
 	
-	gyroDiff.x = gyro.x - lastGyro.x;
-    gyroDiff.y = gyro.y - lastGyro.y;
-    gyroDiff.z = gyro.z - lastGyro.z;
-    lastGyro = gyro;
+	gyroDiff = Vector3f_Sub(gyro, lastGyro);
+  lastGyro = gyro;
 	
 	//30次采样数据中超过10次数值变化大于阈值就表明飞机不处于静止状态
-	if(count < 30)
+	if(cnt_1 < 30)
 	{
-		count++;
+		cnt_1++;
 		//陀螺仪数值变化大于阈值
-		if(abs(gyroDiff.x) > threshold || abs(gyroDiff.y) > threshold || abs(gyroDiff.z) > threshold)
+		if(abs(gyroDiff.x) > threshold1 || abs(gyroDiff.y) > threshold1 || abs(gyroDiff.z) > threshold1)
 		{
-			checkNum++;
+			chk_1++;
 		}
 	}
 	else
 	{
 		//陀螺仪数据抖动次数大于一定值时认为飞机不处于静止状态
-		if(checkNum > 10)
+		if(chk_1 > 10)
 			flyStatus.placement = MOTIONAL;
 		else
 			flyStatus.placement = STATIC;
 		
-		checkNum = 0;
-		count = 0;
+		chk_1 = 0;
+		cnt_1 = 0;
 	}
 }
 

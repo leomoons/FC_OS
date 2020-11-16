@@ -271,6 +271,22 @@ void RotateVector3f(enum Rotation rot, Vector3f_t* v)
 			v->z = -tmp;
 			break;
 		}
+		
+		case ROTATION_ACC_DOWN: {
+			float tmp = v->x;
+			v->x = -v->y;
+			v->y = -tmp;
+			v->z = -v->z;
+			break;
+		}
+		
+		case ROTATION_GYRO_DOWN: {
+			float tmp = v->x;
+			v->x = v->y;
+			v->y = tmp;
+			v->z = -v->z;
+			break;
+		}
 		default:
 			break;
 	}

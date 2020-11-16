@@ -551,6 +551,8 @@ void AccZaxisCalibration(Vector3f_t *accRaw)
 		
 		_acc.cali.offset.z = acc_z[2] + acc_z[3];
 		
+		if(fabs(_acc.cali.offset.z)>0.2f)	_acc.cali.offset.z = 0.0f;
+		
 		//存储参数
 		ParamUpdateData(PARAM_ACC_OFFSET_Z, &_acc.cali.offset.z);
 			
