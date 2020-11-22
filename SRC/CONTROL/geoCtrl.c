@@ -11,11 +11,12 @@
 #include "mathConfig.h"
 #include "controller.h"
 
-
 #include "ahrs.h"
 #include "setPoint.h"
 #include "optitrack.h"
 #include "gyroscope.h"
+
+
 #define MAX_POS_DES	2	//手动飞行中摇杆所能对应的最大位置误差（单位：m）
 #define MAX_ATT_DES	1.57	//手动飞行中摇杆所能对应的最大角度误差（单位:rad）
 #define VEL_DEFAULT 0.5	//手动飞行中默认的线速度大小(m/s)
@@ -40,13 +41,13 @@ void GeoControllerInit(void)
 	_geo.Kv[3]= 0; _geo.Kv[4]=-1; _geo.Kv[5]= 0;
 	_geo.Kv[6]= 0; _geo.Kv[7]= 0; _geo.Kv[8]=-1;
 	
-	_geo.KR[0]=-2; _geo.KR[1]= 0; _geo.KR[2]= 0;
-	_geo.KR[3]= 0; _geo.KR[4]=-1; _geo.KR[5]= 0;
-	_geo.KR[6]= 0; _geo.KR[7]= 0; _geo.KR[8]=-1;
+	_geo.KR[0]=-0.3f; _geo.KR[1]=    0; _geo.KR[2]=    0;
+	_geo.KR[3]=    0; _geo.KR[4]=-0.3f; _geo.KR[5]=    0;
+	_geo.KR[6]=    0; _geo.KR[7]=    0; _geo.KR[8]=-0.2f;
 	
-	_geo.KW[0]=-0.5; _geo.KW[1]= 0; _geo.KW[2]= 0;
-	_geo.KW[3]= 0; _geo.KW[4]=-0.3; _geo.KW[5]= 0;
-	_geo.KW[6]= 0; _geo.KW[7]= 0; _geo.KW[8]=-0.2;
+	_geo.KW[0]=-0.05f; _geo.KW[1]=    0; _geo.KW[2]=    0;
+	_geo.KW[3]=    0; _geo.KW[4]=-0.05f; _geo.KW[5]=    0;
+	_geo.KW[6]=    0; _geo.KW[7]=    0; _geo.KW[8]=-0.04f;
 }
 
 
@@ -63,12 +64,12 @@ static Vector3f_t ForceCal(void)
 	Vector3f_t sum1, sum2, sum3;
 	float R_T[9];
 	/***********计算位置和速度误差***********/
-	Vector3f_t pos_err = Vector3f_Sub(_geo.pos_fb, _geo.pos_des);
-	Vector3f_t vel_err = Vector3f_Sub(_geo.vel_fb, _geo.vel_des);
+	_geo.pos_err = Vector3f_Sub(_geo.pos_fb, _geo.pos_des);
+	_geo.vel_err = Vector3f_Sub(_geo.vel_fb, _geo.vel_des);
 	
 	// each element of Force equation 
-	tmp1 = Matrix3MulVector3(_geo.Kp, pos_err);		// first element	
-	tmp2 = Matrix3MulVector3(_geo.Kv, vel_err); 	// second element
+	tmp1 = Matrix3MulVector3(_geo.Kp, _geo.pos_err);		// first element	
+	tmp2 = Matrix3MulVector3(_geo.Kv, _geo.vel_err); 	// second element
 	tmp3.x=0.0f; tmp3.y=0.0f; tmp3.z=_veh.mass*GRAVITY_ACCEL;	//masss*g*[0;0;1]
 	tmp4.x = _veh.mass * _geo.acc_des.x;
 	tmp4.y = _veh.mass * _geo.acc_des.y;
@@ -102,13 +103,12 @@ static Vector3f_t Attitude_Error(void)
 	Matrix3_Mul(R_fb_T, _geo.R_des, tmp2);
 	Matrix3_Sub(tmp1, tmp2, tmp3);
 	
-	Vector3f_t R_err;
 	// vee_map
-	R_err.x = tmp3[7]/2;
-	R_err.y = tmp3[2]/2;
-	R_err.z = tmp3[3]/2;
+	_geo.R_err.x = tmp3[7]/2;
+	_geo.R_err.y = tmp3[2]/2;
+	_geo.R_err.z = tmp3[3]/2;
 	
-	return R_err;
+	return _geo.R_err;
 }
 
 /**********************************************************************************************************
@@ -126,7 +126,8 @@ static Vector3f_t Angular_Rate_Error(void)
 	Matrix3_Mul(R_fb_T, _geo.R_des, tmp1);
 	Vector3f_t v1 = Matrix3MulVector3(tmp1, _geo.W_des);
 	
-	return Vector3f_Sub(_geo.W_fb, v1);
+	_geo.W_err = Vector3f_Sub(_geo.W_fb, v1);
+	return _geo.W_err;
 }
 
 /**********************************************************************************************************
@@ -173,13 +174,12 @@ static Vector3f_t MomentCal(void)
 
 
 /**********************************************************************************************************
-*函 数 名: GeoCtrlTask
+*函 数 名: GeoCtrlUpdate
 *功能说明: 几何控制器主函数
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
-Vector3f_t att_des;
-void GeoCtrlTask(void)
+void GeoCtrlUpdate(void)
 {
 	//不同的飞行模式选择不同的轨线期望值和反馈值来源
 	if(GetFlightMode() == MANUAL)
@@ -191,14 +191,14 @@ void GeoCtrlTask(void)
 		float W_default = ANG_VEL_DEFAULT;
 		int16_t _deadzone = 50;
 
-		
+		Vector3f_t att_des;
 		
 		//遥控通道值归一化
 		_geo.pos_des.x = ApplyDeadbandFloat(CH_N[CH7], _deadzone)*0.0023f*max_pos_des;
 		_geo.pos_des.y = ApplyDeadbandFloat(CH_N[CH8], _deadzone)*0.0023f*max_pos_des;
-		_geo.pos_des.z =-ApplyDeadbandFloat(CH_N[CH3], _deadzone)*0.0023f*max_pos_des;
+		_geo.pos_des.z = ApplyDeadbandFloat(CH_N[CH3], _deadzone)*0.0023f*max_pos_des;
 		att_des.x = ApplyDeadbandFloat(CH_N[CH1], _deadzone)*0.0023f*max_att_des;
-		att_des.y =-ApplyDeadbandFloat(CH_N[CH2], _deadzone)*0.0023f*max_att_des;
+		att_des.y = ApplyDeadbandFloat(CH_N[CH2], _deadzone)*0.0023f*max_att_des;
 		att_des.z =-ApplyDeadbandFloat(CH_N[CH4], _deadzone)*0.0023f*max_att_des;
 		
 		/*************位置向量及各阶导数(setpoint&feedback)**************/
@@ -252,15 +252,15 @@ void GeoCtrlTask(void)
 		_geo.R_fb[0] = 0.0f;  _geo.R_fb[1] = 0.0f;  _geo.R_fb[0] = 1.0f;
 	}
 	// calculate desired set given desired trajectory
-	Vector3f_t force = ForceCal();
-	Vector3f_t moment = MomentCal();
+	_geo.ctrl.F_b = ForceCal();
+	_geo.ctrl.M_b = MomentCal();
 	
-	_geo.CtrlSet[0] = force.x;
-	_geo.CtrlSet[1] = force.y;
-	_geo.CtrlSet[2] = force.z;
-	_geo.CtrlSet[3] = moment.x;
-	_geo.CtrlSet[4] = moment.y;
-	_geo.CtrlSet[5] = moment.z;
+	_geo.ctrl.wrench[0] = _geo.ctrl.F_b.x;
+	_geo.ctrl.wrench[1] = _geo.ctrl.F_b.y;
+	_geo.ctrl.wrench[2] = _geo.ctrl.F_b.z;
+	_geo.ctrl.wrench[3] = _geo.ctrl.M_b.x;
+	_geo.ctrl.wrench[4] = _geo.ctrl.M_b.y;
+	_geo.ctrl.wrench[5] = _geo.ctrl.M_b.z;
 	
 }
 

@@ -2,7 +2,7 @@
 #define __GEOCTRL_H
 
 #include "mathConfig.h" 
-
+#include "controller.h"
 
 typedef struct
 {
@@ -18,18 +18,24 @@ typedef struct
 	Vector3f_t W_fb;
 	Vector3f_t W_dot_des;
 	
+	//误差向量
+	Vector3f_t pos_err;
+	Vector3f_t vel_err;
+	Vector3f_t R_err;
+	Vector3f_t W_err;
+	
 	// Gain coefficient
 	float Kp[9];
 	float Kv[9];
 	float KR[9];
 	float KW[9];
 	
-	float CtrlSet[6];
+	control_set_t ctrl;
 }GeoControl_t;
 extern GeoControl_t _geo;
 
 void GeoControllerInit(void);
-void GeoCtrlTask(void);
+void GeoCtrlUpdate(void);
 
 
 #endif

@@ -1,14 +1,18 @@
 /**********************************************************************************************************
- * @文件     geoCtrl.c
- * @说明     几何控制器
+ * @文件     controller.c
+ * @说明     控制器总和
  * @版本  	 V1.0
  * @作者     Leomoon
  * @日期     2020.10
 **********************************************************************************************************/
 #include "controller.h"
+#include "disturbanceEst.h"
 #include "geoCtrl.h"
 
-_vehicle_para _veh;
+vehicle_para _veh;
+control_set_t _ctrl;
+
+
 
 enum
 {
@@ -17,6 +21,7 @@ enum
 };
 
 #define CONTROLLER PD
+
 
 /**********************************************************************************************************
 *函 数 名: ControllerInit
@@ -28,9 +33,14 @@ void ControllerInit(void)
 {
 	/***********机身物理参数初始化***********************/
 	//inerita matrix
-	_veh.J[0]=0.0444f;	_veh.J[1]=0.0f;	 	_veh.J[2]=0.0f;
-	_veh.J[3]=0.0f;		_veh.J[4]=0.434f;	_veh.J[5]=0.0f;
-	_veh.J[6]=0.0f;		_veh.J[7]=0.0f;		_veh.J[8]=0.0756f;
+	_veh.J[0]=0.0444f;	_veh.J[1]=  0.0f;	 	_veh.J[2]=   0.0f;
+	_veh.J[3]=   0.0f;  _veh.J[4]=0.434f;		_veh.J[5]=   0.0f;
+	_veh.J[6]=   0.0f;	_veh.J[7]=  0.0f;		_veh.J[8]=0.0756f;
+	
+	_veh.J_inv[0]=22.5087f;	_veh.J_inv[1]=    0.0f; _veh.J_inv[2]=    0.0f;
+	_veh.J_inv[3]=    0.0f; _veh.J_inv[4]=23.0661f;	_veh.J_inv[5]=    0.0f;
+	_veh.J_inv[6]=    0.0f;	_veh.J_inv[7]=    0.0f;	_veh.J_inv[8]=13.2188f;
+	
 	
 	_veh.mass = 0.8846;
 	// inverse of control allocation matrix
@@ -55,6 +65,8 @@ void ControllerInit(void)
 	{
 		GeoControllerInit();
 	}
+	//扰动估计模块初始化
+	estimatorInit();
 }
 
 /**********************************************************************************************************
@@ -67,6 +79,20 @@ void CtrlTask(void)
 {
 	if(CONTROLLER == PD)
 	{
-		GeoCtrlTask();
+		GeoCtrlUpdate();
 	}
+	//estimatorUpdate();
+	
+//	_ctrl.F_b = Vector3f_Add(_geo.ctrl.F_b, _est.F_b);
+//	_ctrl.M_b = Vector3f_Add(_geo.ctrl.M_b, _est.M_b);
+	
+	_ctrl.F_b = _geo.ctrl.F_b;
+	_ctrl.M_b = _geo.ctrl.M_b;
+	
+	_ctrl.wrench[0] = _ctrl.F_b.x;
+	_ctrl.wrench[1] = _ctrl.F_b.y;
+	_ctrl.wrench[2] = _ctrl.F_b.z;
+	_ctrl.wrench[3] = _ctrl.M_b.x;
+	_ctrl.wrench[4] = _ctrl.M_b.y;
+	_ctrl.wrench[5] = _ctrl.M_b.z;
 }

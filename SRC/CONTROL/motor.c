@@ -24,8 +24,8 @@
 **********************************************************************************************************/
 void MotorInit(void)
 {
-    PWM_Out_Init();
-	DelayMs(10);
+  PWM_Out_Init();
+	DelayMs(1);
 	
 	// Init ESC
 	int PWM = 5940;
@@ -36,7 +36,8 @@ void MotorInit(void)
 	TIM5->CCR3 = PWM;			
 	TIM5->CCR4 = PWM;
 	
-	DelayMs(2000);
+	
+	DelayXms(200);
 }
 
 /**********************************************************************************************************
@@ -45,11 +46,12 @@ void MotorInit(void)
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
+int32_t PWM_diff[6], PWM_cur[6], PWM_former[6];
 void MotorCtrlTask(void)
 {
 	float motor[6];
-	Matrix6MulVector6(_veh.Binv, _geo.CtrlSet, motor);
-	static int32_t PWM_diff[6], PWM_cur[6], PWM_former[6];
+	Matrix6MulVector6(_veh.Binv, _ctrl.wrench, motor);
+	//static int32_t PWM_diff[6], PWM_cur[6], PWM_former[6];
 	
 	if(GetFlightMode() == FAILSAFE)
 	{
