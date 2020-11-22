@@ -25,8 +25,10 @@ portTASK_FUNCTION(vFlightControlTask, pvParameters)
 {
 	portTickType xLastWakeTime;
 
+	//vTaskSuspendAll();
 	ControllerInit();
 	MotorInit();
+	//xTaskResumeAll();
 	
 	xLastWakeTime = xTaskGetTickCount();
 	

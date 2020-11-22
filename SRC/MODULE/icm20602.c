@@ -321,7 +321,7 @@ void ICM20602_ReadAcc(Vector3f_t* acc)
 	//转化为右手系，单位转化为单位重力加速度
     acc->x = (float)accRaw.x * MPU_A_16mg;
     acc->y = (float)accRaw.y * MPU_A_16mg;
-    acc->z =-(float)accRaw.z * MPU_A_16mg;
+    acc->z = (float)accRaw.z * MPU_A_16mg;
 //	acc->x = (float)accRaw.x;
 //  acc->y = (float)accRaw.y;
 //  acc->z = (float)accRaw.z;

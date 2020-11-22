@@ -40,7 +40,7 @@ void MessageQueueCreate(void)
 	
 	messageQueue[GYRO_PRETREAT] = xQueueCreate(2, sizeof(Vector3f_t *));
 	messageQueue[ACC_PRETREAT] = xQueueCreate(2, sizeof(Vector3f_t *));
-	messageQueue[GYRO_LPF] = xQueueCreate(2, sizeof(Vector3f_t *));
+	messageQueue[GYRO_LPF] = xQueueCreate(1, sizeof(Vector3f_t *));
 	messageQueue[MAG_PRETREAT] = xQueueCreate(1, sizeof(Vector3f_t *));
 }
 

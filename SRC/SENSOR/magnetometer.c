@@ -110,9 +110,9 @@ void MagCalibration(Vector3f_t *magRaw, Vector3f_t *gyroLpf)
     static float earthMag = 0;
 	
 	//计算时间间隔，用于积分
-	static uint64_t previousT;
-	float deltaT = (GetSysTimeUs() - previousT) * 1e-6;
-	previousT = GetSysTimeUs();
+	static uint64_t pT1;
+	float deltaT = (GetSysTimeUs() - pT1) * 1e-6;
+	pT1 = GetSysTimeUs();
 	
 	if(_mag.cali.should_cali)
 	{
@@ -292,9 +292,9 @@ void MagCalibration(Vector3f_t *magRaw, Vector3f_t *gyroLpf)
 	static float mag_cali_angle = 0.0f;
 	
 	//计算时间间隔，用于积分
-	static uint64_t previousT;
-	float dT_s = (GetSysTimeUs() - previousT) * 1e-6f;
-	previousT = GetSysTimeUs();
+	static uint64_t pT2;
+	float dT_s = (GetSysTimeUs() - pT2) * 1e-6f;
+	pT2 = GetSysTimeUs();
 	
 	
 	if(_mag.cali.should_cali)

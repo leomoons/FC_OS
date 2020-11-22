@@ -55,10 +55,10 @@ void MahonyAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 	float halfex, halfey, halfez;
 	float qa, qb, qc;
 	
-	static uint64_t previousT = 0.0f;
-	float dT_s = (GetSysTimeUs() - previousT) * 1e-6;
+	static uint64_t pT4 = 0.0f;
+	float dT_s = (GetSysTimeUs() - pT4) * 1e-6;
 	dT_s = ConstrainFloat(dT_s, 5e-4, 2e-3);
-	previousT = GetSysTimeUs();
+	pT4 = GetSysTimeUs();
 	
 	acc.z = -acc.z;
 	
@@ -172,10 +172,10 @@ void MahonyAHRSupdateIMU(Vector3f_t gyro, Vector3f_t acc)
 	float halfex, halfey, halfez;
 	float qa, qb, qc;
 	
-	static uint64_t previousT;
-	float dT_s = (GetSysTimeUs() - previousT) * 1e-6;
+	static uint64_t pT5;
+	float dT_s = (GetSysTimeUs() - pT5) * 1e-6;
 	dT_s = ConstrainFloat(dT_s, 5e-4, 2e-3);
-	previousT = GetSysTimeUs();
+	pT5 = GetSysTimeUs();
 
 	// Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
 	if(!((acc.x == 0.0f) && (acc.y == 0.0f) && (acc.z == 0.0f)))

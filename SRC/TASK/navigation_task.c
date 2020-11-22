@@ -25,10 +25,12 @@ xTaskHandle flightStatusHandle;
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
-Vector3f_t gyroN, accN, magN;
-float dcmat;
+#ifdef _DEBUG_
+Vector3f_t gyroN, accN;
+#endif
+Vector3f_t magN;
+float dcmat[9];
 Vector3f_t eulers;
-
 portTASK_FUNCTION(vAhrsTask, pvParameters)
 {
 	portTickType xLastWakeTime;
@@ -38,9 +40,6 @@ portTASK_FUNCTION(vAhrsTask, pvParameters)
 	Vector3f_t *gyro;
 	Vector3f_t *acc;
 	Vector3f_t *mag;
-
-	
-	//vTaskDelay(500);
 	
 	//挂起调度器
 	vTaskSuspendAll();
@@ -51,18 +50,18 @@ portTASK_FUNCTION(vAhrsTask, pvParameters)
 	//唤醒调度器
 	xTaskResumeAll();
 	
-	
-	
 	xLastWakeTime = xTaskGetTickCount();
 	while(1)
 	{
 		cnt++;
 		cnt %= 20;
 		//从消息队列中获取数据
-		xQueueReceive(messageQueue[GYRO_PRETREAT], &gyro, (3/portTICK_RATE_MS));
+		xQueuePeek(messageQueue[GYRO_LPF], &gyro, (3/portTICK_RATE_MS));
 		xQueueReceive(messageQueue[ACC_PRETREAT], &acc, (3/portTICK_RATE_MS));
+#ifdef _DEBUG_
 		accN = *acc;
 		gyroN = *gyro;
+#endif
 		if(cnt%10 == 0)
 		{
 			xQueueReceive(messageQueue[MAG_PRETREAT], &mag, 0);
@@ -73,7 +72,7 @@ portTASK_FUNCTION(vAhrsTask, pvParameters)
 		//Vector3f_t vecTmp; vecTmp.x=0.0f; vecTmp.y=0.0f; vecTmp.z=0.0f;
 		AHRSupdate(gyro, acc, &magN);		//使用magN防止内存错误访问
 
-		GetDCM(&dcmat);
+		GetDCM(dcmat);
 		GetEuler(&eulers);
 		
 		//阻塞1ms

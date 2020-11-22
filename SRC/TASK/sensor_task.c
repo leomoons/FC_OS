@@ -14,6 +14,7 @@
 #include "gyroscope.h"
 #include "magnetometer.h"
 #include "barometer.h"
+#include "boardConfig.h"
 
 xTaskHandle imuSensorPretreatHandle;
 xTaskHandle otherSensorPretreatHandle;
@@ -25,8 +26,11 @@ xTaskHandle otherSensorPretreatHandle;
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
+#ifdef _DEBUG_
 Vector3f_t accS, gyroS, gyroLPF;
 Vector3f_t accR, gyroR;
+float tempR;
+#endif
 portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 {
 	portTickType xLastWakeTime;
@@ -48,7 +52,6 @@ portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 	AccPreTreatInit();
 	//TODO: IMU传感器恒温参数初始化
 	
-	
 	//唤醒调度器
 	xTaskResumeAll();
 	
@@ -60,8 +63,7 @@ portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 		xQueueReceive(messageQueue[GYRO_SENSOR_READ], &gyroRaw, (3/portTICK_RATE_MS));
 		xQueueReceive(messageQueue[ACC_SENSOR_READ], &accRaw, (3/portTICK_RATE_MS));
 		xQueueReceive(messageQueue[TEMP_SENSOR_READ], &tempRaw, (3/portTICK_RATE_MS));
-		accR = *accRaw;
-		gyroR = *gyroRaw;
+
 		
 		//陀螺仪校准
 		GyroCalibration(gyroRaw);
@@ -77,15 +79,21 @@ portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 		AccDataPreTreat(accRaw, accPre);
 		//陀螺仪数据预处理
 		GyroDataPreTreat(gyroRaw, *tempRaw, gyroPre, gyroLpf);
-		
+
+// 	用于调试
+#ifdef _DEBUG_		
+		accR = *accRaw;
+		gyroR = *gyroRaw;
+		tempR = *tempRaw;
 		accS = *accPre;
 		gyroS = *gyroPre;
 		gyroLPF = *gyroLpf;
-		
+#endif
+
 		//往下一级消息队列中填充数据
 		xQueueSendToBack(messageQueue[ACC_PRETREAT], (void*)&accPre, 0);
-		xQueueSendToBack(messageQueue[GYRO_PRETREAT], (void*)&gyroLpf, 0);
-		xQueueSendToBack(messageQueue[GYRO_LPF], (void*)&gyroLpf, 0);
+		xQueueSendToBack(messageQueue[GYRO_PRETREAT], (void*)&gyroPre, 0);
+		xQueueOverwrite(messageQueue[GYRO_LPF], (void*)&gyroLpf);
 		
 		//阻塞1ms
 		vTaskDelayUntil(&xLastWakeTime, (1/portTICK_RATE_MS));
@@ -100,7 +108,9 @@ portTASK_FUNCTION(vImuPretreatTask, pvParameters)
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
+#ifdef _DEBUG_
 Vector3f_t magR, magS;
+#endif
 portTASK_FUNCTION(vOtherPretreatTask, pvParameters)
 {
 	portTickType xLastWakeTime;
@@ -132,15 +142,19 @@ portTASK_FUNCTION(vOtherPretreatTask, pvParameters)
 		if(cnt%2 == 0)
 		{
 			xQueueReceive(messageQueue[MAG_SENSOR_READ], &magRaw, (3/portTICK_RATE_MS));
-			xQueueReceive(messageQueue[GYRO_LPF], &gyroLpf, (3/portTICK_RATE_MS));
-			magR = *magRaw;
-		
+			xQueuePeek(messageQueue[GYRO_LPF], &gyroLpf, (3/portTICK_RATE_MS));
+			
 			//磁力计校准
 			MagCalibration(magRaw, gyroLpf);
 			
 			//磁力计数据预处理
 			MagDataPreTreat(magRaw, magPre);
+			
+#ifdef _DEBUG_
+			magR = *magRaw;
 			magS = *magPre;
+#endif
+			
 			xQueueSendToBack(messageQueue[MAG_PRETREAT], (void *)&magPre, (3/portTICK_RATE_MS));
 		}
 
@@ -153,7 +167,7 @@ portTASK_FUNCTION(vOtherPretreatTask, pvParameters)
 			BaroDataPreTreat(*baroPresRaw, *baroTempRaw);
 		}
 		
-		//睡眠5ms
+		//睡眠10ms
 		vTaskDelayUntil(&xLastWakeTime, (10/portTICK_RATE_MS));
 	}
 }

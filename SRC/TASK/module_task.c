@@ -30,6 +30,10 @@ xTaskHandle otherSensorReadHandle;
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
+#ifdef _DEBUG_
+Vector3f_t accM, gyroM;
+float tempM;
+#endif
 portTASK_FUNCTION(vImuSensorReadTask, pvParameters)
 {
 	portTickType xLastWakeTime;
@@ -59,6 +63,13 @@ portTASK_FUNCTION(vImuSensorReadTask, pvParameters)
 		AccDataRead(accRaw);
 		GyroDataRead(gyroRaw);
 		IMUtempRead(tempRaw);
+#ifdef _DEBUG_
+		accM = *accRaw;
+		gyroM = *gyroRaw;
+		tempM = *tempRaw;
+#endif
+		
+		
 		//更新消息队列，通知数据预处理任务对IMU数据进行预处理
 		xQueueSendToBack(messageQueue[ACC_SENSOR_READ], (void *)&accRaw, 0);
 		xQueueSendToBack(messageQueue[GYRO_SENSOR_READ], (void *)&gyroRaw, 0);
@@ -76,7 +87,9 @@ portTASK_FUNCTION(vImuSensorReadTask, pvParameters)
 *形    参: 无
 *返 回 值: 无
 **********************************************************************************************************/
-Vector3f_t MAGRAW2;
+#ifdef _DEBUG_
+Vector3f_t magM;
+#endif
 portTASK_FUNCTION(vOtherSensorReadTask, pvParameters)
 {
 	portTickType xLastWakeTime;
@@ -110,7 +123,9 @@ portTASK_FUNCTION(vOtherSensorReadTask, pvParameters)
 			MagDataUpdate();
 			MagDataRead(magRaw);
 			xTaskResumeAll();
-			MAGRAW2 = *magRaw;
+#ifdef _DEBUG_
+			magM = *magRaw;
+#endif
 			xQueueSendToBack(messageQueue[MAG_SENSOR_READ], (void *)&magRaw, 0);
 		}
 			
@@ -150,6 +165,6 @@ portTASK_FUNCTION(vOtherSensorReadTask, pvParameters)
 void ModuleTaskCreate(void)
 {
 	xTaskCreate(vImuSensorReadTask, "imuSensorRead", IMU_SENSOR_READ_TASK_STACK, NULL,  IMU_SENSOR_READ_TASK_PRIORITY, &imuSensorReadHandle);
-    xTaskCreate(vOtherSensorReadTask, "sensorUpdate", OTHER_SENSOR_READ_TASK_STACK, NULL, OTHER_SENSOR_READ_TASK_PRIORITY, &otherSensorReadHandle);
+	xTaskCreate(vOtherSensorReadTask, "sensorUpdate", OTHER_SENSOR_READ_TASK_STACK, NULL, OTHER_SENSOR_READ_TASK_PRIORITY, &otherSensorReadHandle);
 }
 

@@ -15,7 +15,7 @@ int main()
 	
 	int16_t pwm[6] = {5940,5940,5940,5940,5940,5940};
 	Set_PWM(pwm);
-	DelayMs(100);
+	DelayMs(200);
 	
 	while(1)
 	{
@@ -23,6 +23,7 @@ int main()
 		{
 			pwm[num] = 20*i+5940;
 		}
+		Set_PWM(pwm);
 				
 		if(direction == 0)
 		{

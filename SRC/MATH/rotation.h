@@ -39,6 +39,8 @@ enum Rotation
     ROTATION_PITCH_90_ROLL_270	 = 31,
 		ROTATION_ACC_DOWN            = 32,
 		ROTATION_GYRO_DOWN					 = 33,
+		ROTATION_ACC_UP							 = 34,
+		ROTATION_GYRO_UP             = 35,
     ROTATION_MAX
 };
 

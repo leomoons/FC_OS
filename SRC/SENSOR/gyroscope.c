@@ -30,8 +30,8 @@ void GyroPreTreatInit(void)
 	ParamGetData(PARAM_GYRO_OFFSET_Y, &_gyro.cali.offset.y, 4);
 	ParamGetData(PARAM_GYRO_OFFSET_Z, &_gyro.cali.offset.z, 4);
 	ParamGetData(PARAM_GYRO_SCALE_X, &_gyro.cali.scale.x, 4);
-    ParamGetData(PARAM_GYRO_SCALE_Y, &_gyro.cali.scale.y, 4);
-    ParamGetData(PARAM_GYRO_SCALE_Z, &_gyro.cali.scale.z, 4);
+  ParamGetData(PARAM_GYRO_SCALE_Y, &_gyro.cali.scale.y, 4);
+  ParamGetData(PARAM_GYRO_SCALE_Z, &_gyro.cali.scale.z, 4);
 	
 	if(isnan(_gyro.cali.offset.x) || isnan(_gyro.cali.offset.y) || isnan(_gyro.cali.offset.z))
 	{

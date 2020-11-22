@@ -61,10 +61,10 @@ void AnoAHRSupdate(Vector3f_t gyro, Vector3f_t acc, Vector3f_t mag)
 {
 	
 	
-	static uint64_t previousT;
-	float dT_s = (GetSysTimeUs() - previousT) * 1e-6;
+	static uint64_t pT3;
+	float dT_s = (GetSysTimeUs() - pT3) * 1e-6;
 	dT_s = ConstrainFloat(dT_s, 0.0005, 0.002);
-	previousT = GetSysTimeUs();
+	pT3 = GetSysTimeUs();
 	
 	q0q1 = _ano.quat[0] * _ano.quat[1];
 	q0q2 = _ano.quat[0] * _ano.quat[2];
@@ -182,8 +182,8 @@ void AnoGetEuler(Vector3f_t *euler)
 {
 	float quat[4] = {_ano.quat[0], _ano.quat[1], _ano.quat[2], _ano.quat[3]};
 	_ano.euler = *euler = Quater_to_Euler(quat);
-	euler->z = -euler->z;
 	euler->y = -euler->y;
+	euler->z = -euler->z;
 	
 //	float t_temp = LIMIT(1 - Sq(_ano.dcm[6]), 0, 1);
 //	
