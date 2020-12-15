@@ -8,12 +8,15 @@
 #include "LYHDecode.h"  
 #include "stdlib.h"
 #include "message.h"
+#include "parameter.h"
 
 #include "accelerometer.h"
 #include "gyroscope.h"
 #include "magnetometer.h"
+#include "geoCtrl.h"
 
-u8 LYH_RxBuffer[10], LYH_data_ok=0;
+u8 LYH_RxBuffer[10], LYH_cali_ok=0;
+u8 LYH_controller_ok=0;
 
 /**********************************************************************************************************
 *函 数 名: LYH_Data_Receive_Prepare
@@ -23,37 +26,70 @@ u8 LYH_RxBuffer[10], LYH_data_ok=0;
 **********************************************************************************************************/
 void LYH_Data_Receive_Prepare(u8 data)
 {
-	static u8 state = 0;
+	static u8 state1 = 0, state2 = 0;
 	
-	if(state==0&&data==0x46)	//帧头0x46('F')
+	//校准指令解析
+	if(state1==0 && data==0x46)	//帧头0x46('F')
 	{
-		state=1;
+		state1=1;
 		LYH_RxBuffer[0]=data;
 	}
-	else if(state==1&&data==0x75)	//第二帧0x75('u')
+	else if(state1==1 && data==0x75)	//第二帧0x75('u')
 	{
-		state=2;
+		state1=2;
 		LYH_RxBuffer[1]=data;
 	}
-	else if(state==2 && data==0x63)		//第三帧0x63('c')
+	else if(state1==2 && data==0x63)		//第三帧0x63('c')
 	{
-		state=3;
+		state1=3;
 		LYH_RxBuffer[2]=data;
 	}
-	else if(state==3 && data==0x6B)		//第四帧0x6B('k')
+	else if(state1==3 && data==0x6B)		//第四帧0x6B('k')
 	{
-		state=4;
+		state1=4;
 		LYH_RxBuffer[3]=data;
 	}
-	else if(state==4)		//命令选择，
+	else if(state1==4)		//命令选择，
 	{
-		state = 5;
+		state1 = 5;
 		LYH_RxBuffer[4]=data;
-		LYH_data_ok = 1;
+		LYH_cali_ok = 1;
 	}
 	else
-		state = 0;
+		state1 = 0;
+	
+	// 修改控制器参数指令解析
+	if(state2==0 && data==0x50)	//帧头0x50('P')
+	{
+		state2=1;
+		LYH_RxBuffer[0] = data;
+	}
+	//选择p:0x70 v:0x76 R:0x52 W:0x57
+	else if(state2==1 && (data==0x70 || data==0x76 || data==0x52 || data==0x57))	
+	{
+		state2=2;
+		LYH_RxBuffer[1] = data;
+	}	
+	//选择三个轴中的一个
+	else if(state2==2 && (data==0x78 || data==0x79 || data==0x7A))
+	{
+		state2=3;
+		LYH_RxBuffer[2] = data;
+	}
+	//参数载入buffer
+	else if(state2>=3 && LYH_RxBuffer[0] == 0x50)
+	{
+		LYH_RxBuffer[state2++] = data;
+		if(state2 == 7)
+		{
+			state2=0;
+			LYH_controller_ok = 1;
+		}
+	}
+	else 
+		state2=0;
 }
+
 
 
 /**********************************************************************************************************
@@ -64,11 +100,12 @@ void LYH_Data_Receive_Prepare(u8 data)
 **********************************************************************************************************/
 void LYH_Receive_Loop(void)
 {
-	if(LYH_data_ok)
+	char *str;
+	if(LYH_cali_ok)
 	{
-		LYH_data_ok = 0;
-		char *str;
-		//命令选择: 'a'：加速度计校准， 'g'：陀螺仪校准， 'm': 磁力计校准， 'l'：水平校准
+		LYH_cali_ok = 0;
+		
+		//命令选择: 'a'：加速度计校准， 'g'：陀螺仪校准， 'm': 磁力计校准， 'l'：水平校准, 'r':参数reset
 		switch(LYH_RxBuffer[4])			
 		{
 			case 'a':
@@ -91,13 +128,97 @@ void LYH_Receive_Loop(void)
 			
 			case 'm':
 				MagCalibrateEnable();
-			
 				str = "Magnerometer calibration";
 				MessageSendString(str);
+			break;
+			
+			case 'r':
+				ParamBufferReset();
+				GeoControllerInit();
 			break;
 			
 			default:
 				break;	
 		}
+	}
+	if(LYH_controller_ok)
+	{
+		LYH_controller_ok = 0;
+		
+		float paramData;
+		uint8_t* pp = (uint8_t*)&paramData;
+		pp[0] = LYH_RxBuffer[6];
+		pp[1] = LYH_RxBuffer[5];
+		pp[2] = LYH_RxBuffer[4];
+		pp[3] = LYH_RxBuffer[3];
+		
+		int paramSelect = 0;
+		
+		// 控制器参数修改选择：
+		// 'p':位置环节参数， 'v'：速度环节参数， 'R'：姿态环节参数， 'W'：角速度环节参数
+		switch(LYH_RxBuffer[1])
+		{
+			case 'p':
+				switch(LYH_RxBuffer[2])
+				{
+					case 'x':
+						paramSelect = CONTROLLER_PD_Kp_X;
+					break;
+					case 'y':
+						paramSelect = CONTROLLER_PD_Kp_Y;
+					break;
+					case 'z':
+						paramSelect = CONTROLLER_PD_Kp_Z;
+					break;
+				}
+			break;
+			
+			case 'v':
+				switch(LYH_RxBuffer[2])
+				{
+					case 'x':
+						paramSelect = CONTROLLER_PD_Kv_X;
+					break;
+					case 'y':
+						paramSelect = CONTROLLER_PD_Kv_Y;
+					break;
+					case 'z':
+						paramSelect = CONTROLLER_PD_Kv_Z;
+					break;
+				}
+			break;	
+				
+			case 'R':
+				switch(LYH_RxBuffer[2])
+				{
+					case 'x':
+						paramSelect = CONTROLLER_PD_KR_X;
+					break;
+					case 'y':
+						paramSelect = CONTROLLER_PD_KR_Y;
+					break;
+					case 'z':
+						paramSelect = CONTROLLER_PD_KR_Z;
+					break;
+				}
+			break;
+						
+			case 'W':
+				switch(LYH_RxBuffer[2])
+				{
+					case 'x':
+						paramSelect = CONTROLLER_PD_KW_X;
+					break;
+					case 'y':
+						paramSelect = CONTROLLER_PD_KW_Y;
+					break;
+					case 'z':
+						paramSelect = CONTROLLER_PD_KW_Z;
+					break;
+				}
+			break;						
+		}
+		
+		GeoCtrlUpdateParam(paramSelect, paramData);
 	}
 }

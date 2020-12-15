@@ -26,8 +26,8 @@ static uint16_t param_save_cnt = 0;
 **********************************************************************************************************/
 void ParamInit(void)
 {
-	W25QXX_Init();
-	
+		W25QXX_Init();
+
     ParamReadFromFlash();
 	
 	//TODO: 设置参数读取后的相应状态
@@ -67,6 +67,22 @@ static void ParamDataReset(void)
 	Param.data[PARAM_IMU_LEVEL_X] = 0.0;
 	Param.data[PARAM_IMU_LEVEL_Y] = 0.0;
 	Param.data[PARAM_IMU_LEVEL_Z] = 0.0;
+	//PD控制器参数
+	Param.data[CONTROLLER_PD_Kp_X] = -3.0;
+	Param.data[CONTROLLER_PD_Kp_Y] = -3.0;
+	Param.data[CONTROLLER_PD_Kp_Z] = -3.0;
+	
+	Param.data[CONTROLLER_PD_Kv_X] = -1.0;
+	Param.data[CONTROLLER_PD_Kv_Y] = -1.0;
+	Param.data[CONTROLLER_PD_Kv_Z] = -1.0;
+	
+	Param.data[CONTROLLER_PD_KR_X] = -0.3;
+	Param.data[CONTROLLER_PD_KR_Y] = -0.3;
+	Param.data[CONTROLLER_PD_KR_Z] = -0.2;
+	
+	Param.data[CONTROLLER_PD_KW_X] = -0.05;
+	Param.data[CONTROLLER_PD_KW_Y] = -0.05;
+	Param.data[CONTROLLER_PD_KW_Z] = -0.04;
 	
 	param_save_cnt = 1;
 }

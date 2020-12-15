@@ -10,6 +10,7 @@
 #include "remote.h"
 #include "mathConfig.h"
 #include "controller.h"
+#include "parameter.h"
 
 #include "ahrs.h"
 #include "setPoint.h"
@@ -33,23 +34,78 @@ GeoControl_t _geo;
 **********************************************************************************************************/
 void GeoControllerInit(void)
 {
-	_geo.Kp[0]=-3; _geo.Kp[1]= 0; _geo.Kp[2]= 0;
-	_geo.Kp[3]= 0; _geo.Kp[4]=-3; _geo.Kp[5]= 0;
-	_geo.Kp[6]= 0; _geo.Kp[7]= 0; _geo.Kp[8]=-3;
+	_geo.Kp[1]= _geo.Kp[2]= _geo.Kp[3]= _geo.Kp[5]= _geo.Kp[6]= _geo.Kp[7]= 0; 
+	ParamGetData(CONTROLLER_PD_Kp_X, &(_geo.Kp[0]), 4);
+	ParamGetData(CONTROLLER_PD_Kp_Y, &(_geo.Kp[4]), 4);
+	ParamGetData(CONTROLLER_PD_Kp_Z, &(_geo.Kp[8]), 4);
 	
-	_geo.Kv[0]=-1; _geo.Kv[1]= 0; _geo.Kv[2]= 0;
-	_geo.Kv[3]= 0; _geo.Kv[4]=-1; _geo.Kv[5]= 0;
-	_geo.Kv[6]= 0; _geo.Kv[7]= 0; _geo.Kv[8]=-1;
+	_geo.Kv[1]= _geo.Kv[2]= _geo.Kv[3]= _geo.Kv[5]= _geo.Kv[6]= _geo.Kv[7]= 0; 
+	ParamGetData(CONTROLLER_PD_Kv_X, &(_geo.Kv[0]), 4);
+	ParamGetData(CONTROLLER_PD_Kv_Y, &(_geo.Kv[4]), 4);
+	ParamGetData(CONTROLLER_PD_Kv_Z, &(_geo.Kv[8]), 4);
 	
-	_geo.KR[0]=-0.3f; _geo.KR[1]=    0; _geo.KR[2]=    0;
-	_geo.KR[3]=    0; _geo.KR[4]=-0.3f; _geo.KR[5]=    0;
-	_geo.KR[6]=    0; _geo.KR[7]=    0; _geo.KR[8]=-0.2f;
+	_geo.KR[1]= _geo.KR[2]= _geo.KR[3]= _geo.KR[5]= _geo.KR[6]= _geo.KR[7]= 0;
+	ParamGetData(CONTROLLER_PD_KR_X, &(_geo.KR[0]), 4);
+	ParamGetData(CONTROLLER_PD_KR_Y, &(_geo.KR[4]), 4);
+	ParamGetData(CONTROLLER_PD_KR_Z, &(_geo.KR[8]), 4);
 	
-	_geo.KW[0]=-0.05f; _geo.KW[1]=    0; _geo.KW[2]=    0;
-	_geo.KW[3]=    0; _geo.KW[4]=-0.05f; _geo.KW[5]=    0;
-	_geo.KW[6]=    0; _geo.KW[7]=    0; _geo.KW[8]=-0.04f;
+	_geo.KW[1]= _geo.KW[2]= _geo.KW[3]= _geo.KW[5]= _geo.KW[6]= _geo.KW[7]= 0;
+	ParamGetData(CONTROLLER_PD_KW_X, &(_geo.KW[0]), 4);
+	ParamGetData(CONTROLLER_PD_KW_Y, &(_geo.KW[4]), 4);
+	ParamGetData(CONTROLLER_PD_KW_Z, &(_geo.KW[8]), 4);
 }
 
+/**********************************************************************************************************
+*函 数 名: GeoCtrlUpdateParam
+*功能说明: 几何控制器参数修改
+*形    参: 参数选择param, 参数修改值data
+*返 回 值: 无
+**********************************************************************************************************/
+void GeoCtrlUpdateParam(uint16_t param, float data)
+{
+	switch(param)
+	{
+		case CONTROLLER_PD_Kp_X:
+			_geo.Kp[0] = data;
+		break;
+		case CONTROLLER_PD_Kp_Y:
+			_geo.Kp[4] = data;
+		break;
+		case CONTROLLER_PD_Kp_Z:
+			_geo.Kp[8] = data;
+		break;
+		case CONTROLLER_PD_Kv_X:
+			_geo.Kv[0] = data;
+		break;
+		case CONTROLLER_PD_Kv_Y:
+			_geo.Kv[4] = data;
+		break;
+		case CONTROLLER_PD_Kv_Z:
+			_geo.Kv[8] = data;
+		break;
+		case CONTROLLER_PD_KR_X:
+			_geo.KR[0] = data;
+		break;
+		case CONTROLLER_PD_KR_Y:
+			_geo.KR[4] = data;
+		break;
+		case CONTROLLER_PD_KR_Z:
+			_geo.KR[8] = data;
+		break;
+		case CONTROLLER_PD_KW_X:
+			_geo.KW[0] = data;
+		break;
+		case CONTROLLER_PD_KW_Y:
+			_geo.KW[4] = data;
+		break;
+		case CONTROLLER_PD_KW_Z:
+			_geo.KW[8] = data;
+		break;
+	}
+	
+	//在flash中修改相应参数值
+	ParamUpdateData(param, &data);
+}
 
 /**********************************************************************************************************
 *函 数 名: ForceCal
@@ -261,7 +317,6 @@ void GeoCtrlUpdate(void)
 	_geo.ctrl.wrench[3] = _geo.ctrl.M_b.x;
 	_geo.ctrl.wrench[4] = _geo.ctrl.M_b.y;
 	_geo.ctrl.wrench[5] = _geo.ctrl.M_b.z;
-	
 }
 
 
