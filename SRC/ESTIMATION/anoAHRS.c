@@ -182,7 +182,7 @@ void AnoGetEuler(Vector3f_t *euler)
 {
 	float quat[4] = {_ano.quat[0], _ano.quat[1], _ano.quat[2], _ano.quat[3]};
 	_ano.euler = *euler = Quater_to_Euler(quat);
-	euler->y = -euler->y;
+	euler->x = -euler->x;
 	euler->z = -euler->z;
 	
 //	float t_temp = LIMIT(1 - Sq(_ano.dcm[6]), 0, 1);

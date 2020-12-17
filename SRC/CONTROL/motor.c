@@ -77,9 +77,9 @@ void MotorCtrlTask(void)
 			else if(PWM_diff[i]<-1200)	PWM_cur[i] = 4500;
 			
 			//防止两帧之间变化太大
-			int tmp = PWM_former[i]-PWM_cur[i];	
-			if(tmp>50)	PWM_cur[i] = PWM_former[i]-50;
-			else if(tmp<-50) PWM_cur[i] = PWM_former[i]+50;
+//			int tmp = PWM_former[i]-PWM_cur[i];	
+//			if(tmp>50)	PWM_cur[i] = PWM_former[i]-50;
+//			else if(tmp<-50) PWM_cur[i] = PWM_former[i]+50;
 			
 			PWM_former[i] = PWM_cur[i];
 			

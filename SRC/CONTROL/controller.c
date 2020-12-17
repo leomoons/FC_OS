@@ -51,12 +51,12 @@ void ControllerInit(void)
 //	_veh.Binv[4][0]=-0.3903; _veh.Binv[4][1]= 0.2253; _veh.Binv[4][2]=-0.2461; _veh.Binv[4][3]= 1.1500; _veh.Binv[4][4]=-0.6640; _veh.Binv[4][5]=-0.6640;
 //	_veh.Binv[5][0]=-0.4262; _veh.Binv[5][1]=-0.2461; _veh.Binv[5][2]= 0.2253; _veh.Binv[5][3]=-1.1500; _veh.Binv[5][4]=-0.6640; _veh.Binv[5][5]=-0.6640;
 	
-	_veh.Binv[0][0]=      0; _veh.Binv[0][1]=-0.4714; _veh.Binv[0][2]= 0.2357; _veh.Binv[0][3]=      0; _veh.Binv[0][4]=-1.3889; _veh.Binv[0][5]= 0.6360;
+	_veh.Binv[0][0]=      0; _veh.Binv[0][1]= 0.4714; _veh.Binv[0][2]= 0.2357; _veh.Binv[0][3]=      0; _veh.Binv[0][4]=-1.3889; _veh.Binv[0][5]= 0.6360;
 	_veh.Binv[1][0]= 0.4082; _veh.Binv[1][1]=-0.2357; _veh.Binv[1][2]= 0.2357; _veh.Binv[1][3]= 1.2029; _veh.Binv[1][4]=-0.6945; _veh.Binv[1][5]=-0.6360;
-	_veh.Binv[2][0]= 0.4082; _veh.Binv[2][1]=-0.2357; _veh.Binv[2][2]= 0.2357; _veh.Binv[2][3]= 1.2029; _veh.Binv[2][4]= 0.6945; _veh.Binv[2][5]= 0.6360;
+	_veh.Binv[2][0]=-0.4082; _veh.Binv[2][1]=-0.2357; _veh.Binv[2][2]= 0.2357; _veh.Binv[2][3]= 1.2029; _veh.Binv[2][4]= 0.6945; _veh.Binv[2][5]= 0.6360;
 	_veh.Binv[3][0]=      0; _veh.Binv[3][1]= 0.4714; _veh.Binv[3][2]= 0.2357; _veh.Binv[3][3]=      0; _veh.Binv[3][4]= 1.3889; _veh.Binv[3][5]=-0.6360;
-	_veh.Binv[4][0]=-0.4082; _veh.Binv[4][1]=-0.2357; _veh.Binv[4][2]= 0.2357; _veh.Binv[4][3]=-1.2029; _veh.Binv[4][4]= 0.6945; _veh.Binv[4][5]= 0.6360;
-	_veh.Binv[5][0]=-0.4082; _veh.Binv[5][1]=-0.2357; _veh.Binv[5][2]= 0.2357; _veh.Binv[5][3]=-1.1500; _veh.Binv[5][4]=-0.6945; _veh.Binv[5][5]=-0.6360;
+	_veh.Binv[4][0]= 0.4082; _veh.Binv[4][1]=-0.2357; _veh.Binv[4][2]= 0.2357; _veh.Binv[4][3]=-1.2029; _veh.Binv[4][4]= 0.6945; _veh.Binv[4][5]= 0.6360;
+	_veh.Binv[5][0]=-0.4082; _veh.Binv[5][1]=-0.2357; _veh.Binv[5][2]= 0.2357; _veh.Binv[5][3]=-1.2029; _veh.Binv[5][4]=-0.6945; _veh.Binv[5][5]=-0.6360;
 
 	_veh.T = 0.004f;
 	

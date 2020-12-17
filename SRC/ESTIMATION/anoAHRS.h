@@ -33,12 +33,12 @@ typedef struct{
 	float mkp;
 	float frag_p;
 	
-	u8 G_reset;
-	u8 M_reset;
-	u8 G_fix_en;
-	u8 M_fix_en;
+	uint8_t G_reset;
+	uint8_t M_reset;
+	uint8_t G_fix_en;
+	uint8_t M_fix_en;
 	
-	u8 obs_en;			//是否使能机体坐标系下的状态量观测（observe）
+	uint8_t obs_en;			//是否使能机体坐标系下的状态量观测（observe）
 }ANO_state_st;
 
 void AnoAHRSinit(void);

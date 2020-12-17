@@ -35,6 +35,7 @@ typedef struct
 extern GeoControl_t _geo;
 
 void GeoControllerInit(void);
+void GeoCtrlUpdateParam(uint16_t param, float data);
 void GeoCtrlUpdate(void);
 
 
