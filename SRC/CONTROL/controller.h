@@ -22,7 +22,30 @@ typedef struct
 	Vector3f_t M_b;
 	float wrench[6];
 }control_set_t;
+extern control_set_t _ctrl_only;
 extern control_set_t _ctrl;
+
+typedef struct
+{
+	Vector3f_t pos_des;
+	Vector3f_t pos_fb;
+	Vector3f_t vel_des;
+	Vector3f_t vel_fb;
+	Vector3f_t acc_des;
+	
+	float R_des[9];
+	float R_fb[9];
+	Vector3f_t W_des;
+	Vector3f_t W_fb;
+	Vector3f_t W_dot_des;
+	
+	// 误差向量
+	Vector3f_t pos_err;
+	Vector3f_t vel_err;
+	Vector3f_t R_err;
+	Vector3f_t W_err;
+}droneState_t;
+extern droneState_t _state;
 
 void ControllerInit(void);
 void CtrlTask(void);

@@ -14,7 +14,6 @@
 #include "flightStatus.h"
 #include "mathConfig.h"
 #include "controller.h"
-#include "geoCtrl.h"
 
 /**********************************************************************************************************
 *函 数 名: MotorInit

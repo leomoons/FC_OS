@@ -39,7 +39,7 @@ void BoardInit(void)
 	
 	//串口初始化(usart2,3)
 	Usart2_Init(500000);
-	Usart3_Init(115200);
+	Usart3_Init(57600);
 	
 }
 

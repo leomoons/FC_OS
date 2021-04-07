@@ -10,6 +10,7 @@
 #include "boardConfig.h"
 #include "ahrs.h"
 #include "mathConfig.h"
+#include "optitrack.h"
 
 /*数据拆分宏定义，在发送大于1字节的数据类型时，比如int16、float等，
   需要把数据拆分成单独字节进行发送*/
@@ -84,7 +85,8 @@ void ANO_Send_Loop(void)
 	else if(ano_flag.send_sensor)
 	{
 		ano_flag.send_sensor = 0;
-		GetEuler(&euler);
+		//GetEuler(&euler);		//Euler angle from IMU
+		euler = GetOptiAttEuler();
 		float x = euler.x * RAD_TO_DEG;
 		float y = euler.y * RAD_TO_DEG;
 		float z = euler.z * RAD_TO_DEG;

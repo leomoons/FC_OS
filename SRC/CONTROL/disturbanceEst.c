@@ -13,11 +13,12 @@ estimate_set_t _est;
 
 enum
 {
+	NO_ESTIMATOR,
 	NDOB,
 	ADAPTIVE
 };
 
-#define ESTIMATOR NDOB
+#define ESTIMATOR NO_ESTIMATOR
 
 
 /**********************************************************************************************************
@@ -28,7 +29,11 @@ enum
 **********************************************************************************************************/
 void estimatorInit(void)
 {
-	if(ESTIMATOR == NDOB)
+	if(ESTIMATOR == NO_ESTIMATOR)
+	{
+		;
+	}
+	else if(ESTIMATOR == NDOB)
 	{
 		ndobInit();
 	}
@@ -48,7 +53,12 @@ void estimatorInit(void)
 **********************************************************************************************************/
 void estimatorUpdate(void)
 {
-	if(ESTIMATOR == NDOB)
+	if(ESTIMATOR == NO_ESTIMATOR)
+	{
+		_est.F_b.x = _est.F_b.y = _est.F_b.z = 0.0f;
+		_est.M_b.x = _est.M_b.y = _est.M_b.z = 0.0f;
+	}
+	else if(ESTIMATOR == NDOB)
 	{
 		ndobUpdate();
 		_est = _dob._est;

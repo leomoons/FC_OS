@@ -10,7 +10,6 @@
 #include "gyroscope.h"
 #include "boardConfig.h"
 #include "controller.h"
-#include "geoCtrl.h"
 #include "optitrack.h"
 
 nDOB_t _dob;

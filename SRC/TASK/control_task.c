@@ -41,7 +41,7 @@ portTASK_FUNCTION(vFlightControlTask, pvParameters)
 		//轨迹生成
 		SetPointUpdate();
 		
-		//阻塞1ms
+		//阻塞2ms
 		vTaskDelayUntil(&xLastWakeTime, (2/portTICK_RATE_MS));
 	}
 }

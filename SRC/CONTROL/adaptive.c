@@ -7,9 +7,8 @@
 **********************************************************************************************************/
 #include "adaptive.h"
 #include "boardConfig.h"
-#include "geoCtrl.h"
 #include "ahrs.h"
-
+#include "controller.h"
 
 adaptive_t _ada;
 
@@ -78,8 +77,8 @@ static void adaptiveForceUpdate(void)
 	/*********定义中间变量**********/
 	Vector3f_t tmp1, tmp2, tmp3, tmp4, tmp5;
 	
-	tmp1 = Matrix3MulVector3(_ada.cax, _geo.pos_err);
-	tmp2 = Vector3f_Add(_geo.vel_err, tmp1);
+	tmp1 = Matrix3MulVector3(_ada.cax, _state.pos_err);
+	tmp2 = Vector3f_Add(_state.vel_err, tmp1);
 	
 	tmp3 = Matrix3MulVector3(_ada.Wx_T, tmp2);
 	tmp4 = Matrix3MulVector3(_ada.gamax, tmp3);
@@ -105,8 +104,8 @@ static void adaptiveMomentUpdate(void)
 	/*********定义中间变量**********/
 	Vector3f_t tmp1, tmp2, tmp3, tmp4;
 	
-	tmp1 = Matrix3MulVector3(_ada.caR, _geo.R_err);
-	tmp2 = Vector3f_Add(_geo.W_err, tmp1);
+	tmp1 = Matrix3MulVector3(_ada.caR, _state.R_err);
+	tmp2 = Vector3f_Add(_state.W_err, tmp1);
 	
 	tmp3 = Matrix3MulVector3(_ada.WR_T, tmp2);
 	tmp4 = Matrix3MulVector3(_ada.gamaR, tmp3);

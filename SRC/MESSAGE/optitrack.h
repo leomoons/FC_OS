@@ -18,7 +18,7 @@ typedef struct
 	Vector3f_t W_dot;		//角加速度
 }Optitrack_t;
 
-void OptitrackInit(void);
+//void OptitrackInit(void);
 void Opti_Get_Byte(uint8_t byte);
 void Opti_Get_Data_Task(void);
 

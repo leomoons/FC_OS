@@ -68,21 +68,45 @@ static void ParamDataReset(void)
 	Param.data[PARAM_IMU_LEVEL_Y] = 0.0;
 	Param.data[PARAM_IMU_LEVEL_Z] = 0.0;
 	//PD控制器参数
-	Param.data[CONTROLLER_PD_Kp_X] = -3.0;
-	Param.data[CONTROLLER_PD_Kp_Y] = -3.0;
-	Param.data[CONTROLLER_PD_Kp_Z] = -3.0;
+	Param.data[CONTROLLER_PD_Kp_X] = 1.0;
+	Param.data[CONTROLLER_PD_Kp_Y] = 1.0;
+	Param.data[CONTROLLER_PD_Kp_Z] = 1.0;
 	
-	Param.data[CONTROLLER_PD_Kv_X] = -1.0;
-	Param.data[CONTROLLER_PD_Kv_Y] = -1.0;
-	Param.data[CONTROLLER_PD_Kv_Z] = -1.0;
+	Param.data[CONTROLLER_PD_Kv_X] = 1.0;
+	Param.data[CONTROLLER_PD_Kv_Y] = 1.0;
+	Param.data[CONTROLLER_PD_Kv_Z] = 1.0;
 	
-	Param.data[CONTROLLER_PD_KR_X] = -0.3;
-	Param.data[CONTROLLER_PD_KR_Y] = -0.3;
-	Param.data[CONTROLLER_PD_KR_Z] = -0.2;
+	Param.data[CONTROLLER_PD_KR_X] = 0.3;
+	Param.data[CONTROLLER_PD_KR_Y] = 0.3;
+	Param.data[CONTROLLER_PD_KR_Z] = 0.2;
 	
-	Param.data[CONTROLLER_PD_KW_X] = -0.05;
-	Param.data[CONTROLLER_PD_KW_Y] = -0.05;
-	Param.data[CONTROLLER_PD_KW_Z] = -0.04;
+	Param.data[CONTROLLER_PD_KW_X] = 0.05;
+	Param.data[CONTROLLER_PD_KW_Y] = 0.05;
+	Param.data[CONTROLLER_PD_KW_Z] = 0.04;
+	// SMC控制器参数
+	Param.data[CONTROLLER_SMC_csP_X] = 1.0;
+	Param.data[CONTROLLER_SMC_csP_Y] = 1.0;
+	Param.data[CONTROLLER_SMC_csP_Z] = 1.0;
+	
+	Param.data[CONTROLLER_SMC_HsP_X] = 1.0;
+	Param.data[CONTROLLER_SMC_HsP_Y] = 1.0;
+	Param.data[CONTROLLER_SMC_HsP_Z] = 1.0;
+	
+	Param.data[CONTROLLER_SMC_ksP_X] = 1.0;
+	Param.data[CONTROLLER_SMC_ksP_Y] = 1.0;
+	Param.data[CONTROLLER_SMC_ksP_Z] = 1.0;
+	
+	Param.data[CONTROLLER_SMC_csR_X] = 0.2;
+	Param.data[CONTROLLER_SMC_csR_Y] = 0.2;
+	Param.data[CONTROLLER_SMC_csR_Z] = 0.2;
+
+	Param.data[CONTROLLER_SMC_HsR_X] = 0.1;
+	Param.data[CONTROLLER_SMC_HsR_Y] = 0.1;
+	Param.data[CONTROLLER_SMC_HsR_Z] = 0.1;
+	
+	Param.data[CONTROLLER_SMC_ksR_X] = 0.05;
+	Param.data[CONTROLLER_SMC_ksR_Y] = 0.05;
+	Param.data[CONTROLLER_SMC_ksR_Z] = 0.04;
 	
 	param_save_cnt = 1;
 }

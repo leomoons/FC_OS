@@ -18,11 +18,11 @@ Optitrack_t _opti;
 *形    参: void
 *返 回 值: void
 **********************************************************************************************************/
-void OptitrackInit(void)
-{
-	Usart3_Init(115200);
-	DelayMs(10);
-}
+//void OptitrackInit(void)
+//{
+//	Usart3_Init(115200);
+//	DelayMs(10);
+//}
 	
 
 

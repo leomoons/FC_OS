@@ -11,6 +11,8 @@
 #include "LYHdecode.h"
 #include "remote.h"
 #include "message.h"
+#include "optitrack.h"
+
 xTaskHandle messageHandle;
 
 /**********************************************************************************************************
@@ -35,6 +37,9 @@ portTASK_FUNCTION(vMessageTask, pvParameters)
 		//解码接收信息
 		LYH_Receive_Loop();
 		
+		//解码optitrack信息
+		Opti_Get_Data_Task();
+			
 		//100Hz遥控接收
 		if(cnt%10==0)
 		{
